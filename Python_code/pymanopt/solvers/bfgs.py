@@ -1,32 +1,37 @@
 import time
 from copy import deepcopy
 
-from pymanopt.solvers.linesearch import LineSearchBackTracking
+from pymanopt.solvers.linesearch import LineSearchBFGS
 from pymanopt.solvers.solver import Solver
 
 
 class BFGS(Solver):
     """
     BFGS (quasi-Newton's method) algorithm based on
-    bfgs.m from the manopt MATLAB package.
+    solvers/bfgs/rlbfgs.m from the manopt MATLAB package.
+
+    Based on paper: Huang, Wen, P-A. Absil, and Kyle A. Gallivan. 
+    "A Riemannian BFGS method for nonconvex optimization problems." 
+    In Numerical Mathematics and Advanced Applications ENUMATH 2015, 
+    pp. 627-634. Springer, Cham, 2016.
     """
 
     def __init__(self, linesearch=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         if linesearch is None:
-            self._linesearch = LineSearchBackTracking()
+            self._linesearch = LineSearchBFGS()
         else:
             self._linesearch = linesearch
         self.linesearch = None
 
-    # Function to solve optimisation problem using steepest descent.
+    # Function to solve optimisation problem using BFGS.
     def solve(self, problem, x=None, reuselinesearch=False):
         """
         Perform optimization using gradient descent with linesearch.
         This method first computes the gradient (derivative) of obj
         w.r.t. arg, and then optimizes by moving in the direction of
-        steepest descent (which is the opposite direction to the gradient).
+        BFGS (which is the opposite direction to the gradient).
         Arguments:
             - problem
                 Pymanopt problem setup using the Problem class, this must
@@ -85,7 +90,7 @@ class BFGS(Solver):
 
             # Perform line-search
             stepsize, x = linesearch.search(objective, man, x, desc_dir,
-                                            cost, -gradnorm**2)
+                                            cost, gradient)
 
             stop_reason = self._check_stopping_criterion(
                 time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter)

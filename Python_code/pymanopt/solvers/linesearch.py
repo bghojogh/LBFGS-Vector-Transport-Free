@@ -26,6 +26,8 @@ class LineSearchBackTracking:
                 starting point on the manifold
             - d
                 tangent vector at x (descent direction)
+            - f0
+                objective function value at the current point
             - df0
                 directional derivative at x along d
         Returns:
@@ -134,3 +136,111 @@ class LineSearchAdaptive:
             self._oldalpha = 2 * alpha
 
         return stepsize, newx
+
+
+class LineSearchBFGS:
+    """
+    Back-tracking line-search based on solvers/bfgs/rlbfgs.m in the manopt MATLAB
+    package.
+
+    Based on paper: Huang, Wen, P-A. Absil, and Kyle A. Gallivan. 
+    "A Riemannian BFGS method for nonconvex optimization problems." 
+    In Numerical Mathematics and Advanced Applications ENUMATH 2015, 
+    pp. 627-634. Springer, Cham, 2016.
+    """
+
+    def __init__(self, contraction_factor=.5, optimism=2,
+                 suff_decr=1e-4, maxiter=25, initial_stepsize=1):
+        self.contraction_factor = contraction_factor
+        self.optimism = optimism
+        self.suff_decr = suff_decr
+        self.maxiter = maxiter
+        self.initial_stepsize = initial_stepsize
+
+        self._oldf0 = None
+
+    def search(self, objective, manifold, x, d, f0, gradient):
+        """
+        Function to perform backtracking line-search.
+        Arguments:
+            - objective
+                objective function to optimise
+            - manifold
+                manifold to optimise over
+            - x
+                starting point on the manifold
+            - d
+                - Hessian matrix * tangent vector at x (descent direction)
+            - f0
+                objective function value at the current point
+            - gradient
+                gradient function defined on the manifold
+        Returns:
+            - stepsize
+                norm of the vector retracted to reach newx from x
+            - newx
+                next iterate suggested by the line-search
+        """
+        # Compute the norm of the search direction
+        norm_d = manifold.norm(x, d)
+
+        # Compute directional derivative at x along d
+        grad = gradient(x)
+        gradnorm = manifold.norm(x, grad)
+        df0 = -gradnorm**2
+
+        if self._oldf0 is not None:
+            # Pick initial step size based on where we were last time.
+            alpha = 2 * (f0 - self._oldf0) / df0
+            # Look a little further
+            alpha *= self.optimism
+        else:
+            alpha = self.initial_stepsize / norm_d
+        alpha = float(alpha)
+
+        # Make the chosen step and compute the cost there.
+        newx = manifold.retr(x, alpha * d)
+        newf = objective(newx)
+        step_count = 1
+
+        # Backtrack while the Armijo criterions are not satisfied
+        Armijo_condition = False
+        while ((not Armijo_condition) and step_count <= self.maxiter):
+
+            # Armijo condition:
+            Armijo_condition = (newf <= f0 + self.suff_decr * alpha * df0)
+
+            # Cautious update of Hessian approximation (denoted by B) with BFGS:
+            sk = newx - x  #--> the step = newx - x = alpha * d
+            sk = sk / manifold.norm(x, sk)  # Computation of the BFGS step is invariant under scaling of sk and yk by a common factor. For numerical reasons, we scale sk and yk so that sk is a unit norm vector.
+            yk = gradient(newx) - gradient(x)
+            inner_sk_yk = manifold.inner(x, sk, yk)
+            inner_sk_sk = manifold.norm(x, sk)**2    ### ensures nonnegativity
+            cautious_condition = ((inner_sk_yk/inner_sk_sk) >= self._monotonic_function(gradnorm))
+            if cautious_condition:
+                # B = B + 
+                pass
+
+            # Reduce the step size
+            alpha = self.contraction_factor * alpha
+
+            # and look closer down the line
+            newx = manifold.retr(x, alpha * d)
+            newf = objective(newx)
+
+            step_count = step_count + 1
+
+        # If we got here without obtaining a decrease, we reject the step.
+        if newf > f0:
+            alpha = 0
+            newx = x
+
+        stepsize = alpha * norm_d
+
+        self._oldf0 = f0
+
+        return stepsize, newx
+
+    def _monotonic_function(self, t):
+        # In rlbfgs.m, it is written that f(t) = 1e-4*t is better than f(t) = t for bfgs
+        return 1e-4 * t

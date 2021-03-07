@@ -53,7 +53,8 @@ function [cst X] = test03(n, m)
     % Solve
     % [X cst] = steepestdescent(problem);
     % [X cst] = trustregions(problem);
-    [X cst] = rlbfgs(problem);
+%     [X cst] = rlbfgs(problem);
+    [X cst] = rlbfgs_vector_transform_free(problem);
     
     % Plot the solution
     if n == 3
