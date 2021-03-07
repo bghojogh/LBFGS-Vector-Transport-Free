@@ -1,11 +1,18 @@
 import os
 
+###--> https://gist.github.com/JungeAlexander/6ce0a5213f3af56d7369
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
+
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
-import torch
+# import theano.tensor as T
+# import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
+
 
 import pymanopt
 from pymanopt.manifolds import Sphere
