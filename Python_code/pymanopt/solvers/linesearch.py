@@ -138,15 +138,9 @@ class LineSearchAdaptive:
         return stepsize, newx
 
 
-class LineSearchLBFGS_CautiousUpdate:
+class LineSearch_WolfeConditions:
     """
-    Back-tracking line-search based on solvers/bfgs/rlbfgs.m in the manopt MATLAB
-    package.
-
-    Based on paper: Huang, Wen, P-A. Absil, and Kyle A. Gallivan. 
-    "A Riemannian BFGS method for nonconvex optimization problems." 
-    In Numerical Mathematics and Advanced Applications ENUMATH 2015, 
-    pp. 627-634. Springer, Cham, 2016.
+    Line search with both Wolfe conditions (Armijo and curvature conditions)
     """
 
     def __init__(self, contraction_factor=.5, optimism=2,
@@ -156,9 +150,10 @@ class LineSearchLBFGS_CautiousUpdate:
         self.suff_decr = suff_decr
         self.maxiter = maxiter
         self.initial_stepsize = initial_stepsize
+
         self._oldf0 = None
 
-    def search(self, objective, manifold, x, d, f0, gradient):
+    def search(self, objective, manifold, x, d, f0, df0, gradient_function):
         """
         Function to perform backtracking line-search.
         Arguments:
@@ -169,11 +164,11 @@ class LineSearchLBFGS_CautiousUpdate:
             - x
                 starting point on the manifold
             - d
-                - Hessian matrix * tangent vector at x (descent direction)
+                tangent vector at x (descent direction)
             - f0
                 objective function value at the current point
-            - gradient
-                gradient function defined on the manifold
+            - df0
+                directional derivative at x along d
         Returns:
             - stepsize
                 norm of the vector retracted to reach newx from x
@@ -181,19 +176,15 @@ class LineSearchLBFGS_CautiousUpdate:
                 next iterate suggested by the line-search
         """
         # Compute the norm of the search direction
-        grad = gradient(x)
-        search_dir = -grad
-        norm_search_dir = manifold.norm(x, search_dir)
+        norm_d = manifold.norm(x, d)
 
         if self._oldf0 is not None:
             # Pick initial step size based on where we were last time.
-            gradnorm = manifold.norm(x, grad)
-            df0 = -gradnorm**2
             alpha = 2 * (f0 - self._oldf0) / df0
             # Look a little further
             alpha *= self.optimism
         else:
-            alpha = self.initial_stepsize / norm_search_dir
+            alpha = self.initial_stepsize / norm_d
         alpha = float(alpha)
 
         # Make the chosen step and compute the cost there.
@@ -201,32 +192,17 @@ class LineSearchLBFGS_CautiousUpdate:
         newf = objective(newx)
         step_count = 1
 
-        # Backtrack while the Armijo criterions are not satisfied
-        t = -1  #--> iteration index
-        while ((not Armijo_condition) and step_count <= self.maxiter):
-            t += 1
-            p = -gradient(x)
-            if t == 0:
-                zeta_t = Hessian_inverse @ p
-            else:
-                self.obtain_descent_direction(p, iteration)
+        # Backtrack while the Armijo criterion is not satisfied
+        Armijo_condition, curvature_condition = False, False
+        while ((not Armijo_condition) and (not curvature_condition) and
+               step_count <= self.maxiter):
 
-            # Armijo condition:
             Armijo_condition = (newf <= f0 + self.suff_decr * alpha * df0)
-
-            # Cautious update of Hessian approximation (denoted by B) with BFGS:
-            sk = manifold.transp(x, newx, alpha * d)  #--> the step = newx - x = alpha * d
-            # sk = sk / manifold.norm(x, sk)  # Computation of the BFGS step is invariant under scaling of sk and yk by a common factor. For numerical reasons, we scale sk and yk so that sk is a unit norm vector.
-            yk = gradient(newx) - manifold.transp(x, newx, gradient(x))
-            inner_sk_yk = manifold.inner(x, sk, yk)
-            inner_sk_sk = manifold.norm(x, sk)**2    
-            rho = 1 / inner_sk_yk
-            cautious_condition = ((inner_sk_yk/inner_sk_sk) >= self._monotonic_function(gradnorm))
-            if cautious_condition:
-                B_tilde = manifold.transp(x, newx, B)
-                # B = B_tilde - 
-                # B = B + 
-                pass
+            c2 = 0.9
+            # weak Wolfe condition:
+            # curvature_condition = (gradient_function(newx) @ manifold.transp(x, newx, d) >= c2 * df0)
+            # strong Wolfe condition:
+            curvature_condition = (abs(gradient_function(newx) @ manifold.transp(x, newx, d)) <= c2 * abs(df0))  
 
             # Reduce the step size
             alpha = self.contraction_factor * alpha
@@ -247,13 +223,6 @@ class LineSearchLBFGS_CautiousUpdate:
         self._oldf0 = f0
 
         return stepsize, newx
-
-    def _monotonic_function(self, t):
-        # In rlbfgs.m, it is written that f(t) = 1e-4*t is better than f(t) = t for bfgs
-        return 1e-4 * t
-
-    def obtain_descent_direction(p, iteration):
-        pass
 
     
         

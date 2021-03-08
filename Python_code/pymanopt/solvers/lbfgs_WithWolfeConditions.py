@@ -2,7 +2,7 @@ import time
 from copy import deepcopy
 import autograd.numpy as np
 
-from pymanopt.solvers.linesearch import LineSearchBackTracking
+from pymanopt.solvers.linesearch import LineSearchBackTracking, LineSearch_WolfeConditions
 from pymanopt.solvers.solver import Solver
 
 
@@ -21,7 +21,8 @@ class LBFGS_WithWolfeConditions(Solver):
         super().__init__(*args, **kwargs)
 
         if linesearch is None:
-            self._linesearch = LineSearchBackTracking()
+            # self._linesearch = LineSearchBackTracking()
+            self._linesearch = LineSearch_WolfeConditions()
         else:
             self._linesearch = linesearch
         self.linesearch = None
@@ -100,8 +101,9 @@ class LBFGS_WithWolfeConditions(Solver):
             # Descent direction calculation:
             desc_dir = self._obtain_descent_direction(p=-grad, iteration=iter%self.max_store_depth, Hessian_inverse=Hessian_inverse, man=man)
 
-            # Perform line-search (with Armijo condition):
-            stepsize, x = linesearch.search(objective, man, x, desc_dir, cost, -gradnorm**2)
+            # Perform line-search (with Wolfe conditions):
+            # stepsize, x = linesearch.search(objective, man, x, desc_dir, cost, -gradnorm**2)
+            stepsize, x = linesearch.search(objective, man, x, desc_dir, cost, -gradnorm**2, gradient)
 
             # Calculate some variables:
             x_tPlus1 = x
