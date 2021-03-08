@@ -19,7 +19,8 @@ from pymanopt.manifolds import Sphere
 from pymanopt.solvers import SteepestDescent
 from pymanopt.solvers.linesearch import LineSearchBackTracking
 from pymanopt.solvers.linesearch import LineSearchAdaptive
-from pymanopt.solvers import BFGS
+from pymanopt.solvers import LBFGS_CautiousUpdate
+from pymanopt.solvers import LBFGS_WithWolfeConditions
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -84,7 +85,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # solver = SteepestDescent()
     # solver = SteepestDescent(linesearch=LineSearchBackTracking())
     # solver = SteepestDescent(linesearch=LineSearchAdaptive())
-    solver = BFGS()
+    # solver = LBFGS_CautiousUpdate()
+    solver = LBFGS_WithWolfeConditions()
 
     estimated_dominant_eigenvector = solver.solve(problem)
 

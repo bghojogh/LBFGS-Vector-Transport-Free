@@ -4,7 +4,8 @@ __all__ = [
     "ParticleSwarm",
     "SteepestDescent",
     "TrustRegions",
-    "BFGS"
+    "LBFGS_CautiousUpdate",
+    "LBFGS_WithWolfeConditions"
 ]
 
 from .conjugate_gradient import ConjugateGradient
@@ -12,4 +13,5 @@ from .nelder_mead import NelderMead
 from .particle_swarm import ParticleSwarm
 from .steepest_descent import SteepestDescent
 from .trust_regions import TrustRegions
-from .bfgs import BFGS
+from .lbfgs_CautiousUpdate import LBFGS_CautiousUpdate
+from .lbfgs_WithWolfeConditions import LBFGS_WithWolfeConditions
