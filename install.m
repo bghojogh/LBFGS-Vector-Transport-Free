@@ -17,6 +17,7 @@ addpath(genpath(fullfile(toolbox_root_path, 'solvers')))
 addpath(genpath(fullfile(toolbox_root_path, 'manifolds')))
 addpath(genpath(fullfile(toolbox_root_path, 'mixest')))
 addpath(genpath(fullfile(toolbox_root_path, 'thirdparty')))
+addpath(genpath(fullfile(toolbox_root_path, 'utils')))
 addpath(genpath(fullfile(toolbox_root_path, 'examples')))
 fprintf('[Done]\n')
 

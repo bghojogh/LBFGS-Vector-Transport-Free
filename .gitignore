@@ -25,19 +25,5 @@ doc/public/
 Contents.m
 
 
-# published html except for manually-created ones
-*.html
-!doc/source/*.html
-!doc/source/api/*.html
-!doc/source/examples/*.html
-!doc/source/_jekyll/_layouts/*.html
-!doc/source/_jekyll/_includes/*.html
-
-# published graphics except for manually-created ones
-*.png
-!doc/source/img/*.png
-!doc/source/api/img/*.png
-!doc/source/examples/img/*.png
-
-# other special files
-doc/source/_jekyll/helptoc.xml
+# output/saved files
+saved_files/

@@ -1,5 +1,7 @@
 function X = positive_definite_karcher_mean(A)
 % Computes a Karcher mean of a collection of positive definite matrices.
+%%%%%% for definition of Karcher mean, see --->  https://en.wikipedia.org/wiki/Fr%C3%A9chet_mean
+
 %
 % function X = positive_definite_karcher_mean(A)
 %
@@ -26,10 +28,15 @@ function X = positive_definite_karcher_mean(A)
 % 
 % Change log:
 % 
-    
+  
+clc
+clear all
+close all
+
     % Generate some random data to test the function if none is given.
     if ~exist('A', 'var') || isempty(A)
         n = 5;
+%         n = 100;
         m = 50;
         A = zeros(n, n, m);
         ref = diag(max(.1, 1+.1*randn(n, 1)));
@@ -113,6 +120,21 @@ function X = positive_definite_karcher_mean(A)
 %     X = rlbfgs(problem, A(:, :, 1));
 %     X = lbfgs_MIXEST(problem, A(:, :, 1));
 %     [X cost_ info_] = lbfgs_MIXEST(problem, A(:, :, 1))
-    [X cost_ info_] = lbfgs_MIXEST(problem)
-
+    [X cost_ info_] = lbfgs_MIXEST(problem);
+    
+    %%%%%%%% get the history of optimization:
+    [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
+    
+    %%%%%%%% plot the history of optimization:
+    path_save = "./saved_files/";
+    plot_and_save_figure(cost_list, "cost", path_save)
+    plot_and_save_figure(log(cost_list), "log of cost", path_save)
+    plot_and_save_figure(grad_norm_list, "gradient norm", path_save)
+    plot_and_save_figure(log(grad_norm_list), "log of gradient norm", path_save)
+    plot_and_save_figure(time_iterations, "time of each itr", path_save)
+    plot_and_save_figure(time_list, "time", path_save)
+    
+    %%%%%%%% saving the workspace:
+    save(path_save+'workspace.mat');
+    
 end
