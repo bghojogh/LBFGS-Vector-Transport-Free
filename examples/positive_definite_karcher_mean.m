@@ -35,8 +35,8 @@ close all
 
     % Generate some random data to test the function if none is given.
     if ~exist('A', 'var') || isempty(A)
-        n = 5;
-%         n = 100;
+%         n = 5;
+        n = 100;
         m = 50;
         A = zeros(n, n, m);
         ref = diag(max(.1, 1+.1*randn(n, 1)));

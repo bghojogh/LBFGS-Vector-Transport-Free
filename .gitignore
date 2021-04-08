@@ -19,11 +19,9 @@ slprj/
 # Search databases (created by builddocsearchdb)
 helpsearch/
 
-
 # files only included in release versions
 doc/public/
 Contents.m
-
 
 # output/saved files
 saved_files/
