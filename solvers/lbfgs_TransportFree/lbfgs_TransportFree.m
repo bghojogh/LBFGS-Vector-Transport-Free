@@ -195,7 +195,7 @@ while true
         %lsmem.newd = newd;
         [Expc, Expci] = problem.M.transpstore(x, newx);
     else
-        gradC = problem.M.transp(x, newx, grad); % gradC is the gradient of previous point transported to the tangent space of new point
+        gradC = problem.M.transp(x, newx, grad);
         if isfield(problem.M,'transpf')
             [Expc, Expci] = problem.M.transpstore(x, newx);
         end

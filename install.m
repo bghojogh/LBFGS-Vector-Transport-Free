@@ -1,4 +1,4 @@
-function install_toolbox
+function install
 
 clc
 clear all

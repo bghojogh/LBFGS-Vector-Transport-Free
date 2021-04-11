@@ -64,6 +64,7 @@ close all
     % a logarithmic map log.
 %     M = sympositivedefinitefactory(n);
     M = spdfactory(n);
+%     M = spdffactory(n);
     
     % Define a problem structure, specifying the manifold M, the cost
     % function and its gradient.
@@ -75,7 +76,7 @@ close all
     % (This is only to show an example of how it can be done; the solver
     % below, rlbfgs, does not use the approximate Hessian; trustregions
     % would.)
-    problem.approxhess = approxhessianFD(problem, struct('stepsize', 1e-4));
+%     problem.approxhess = approxhessianFD(problem, struct('stepsize', 1e-4));
     
     % The functions below make many redundant computations. This
     % performance hit can be alleviated by using the caching system. We go
