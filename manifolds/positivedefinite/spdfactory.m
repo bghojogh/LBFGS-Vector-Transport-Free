@@ -113,7 +113,17 @@ M.randvec = @randomvec;
         U = U / norm(U,'fro');
     end
 
+% Linear combination of tangent vectors
 M.lincomb = @lincomb;
+    function d = lincomb(x, a1, d1, a2, d2) %#ok<INUSL>
+        if nargin == 3
+            d = a1*d1;
+        elseif nargin == 5
+            d = a1*d1 + a2*d2;
+        else
+            error('Bad use of psd.lincomb.');
+        end
+    end
 
 M.zerovec = @(x) zeros(n);
 
@@ -147,11 +157,11 @@ else
     fast_sqrtm = @(x)sqrtm_fast(x);
 end
 
-M.transp = @transpvec;   
+M.transp = @transpvec;    %--> Benyamin: this is parallel transport in paper 
     function F = transpvec(X, Y, E)
         if flag
             if riemTransp
-                expconstruct= fast_sqrtm(Y/X);
+                expconstruct= fast_sqrtm(Y/X);  %--> sqrt(Y*inv(X)) --> note: sqrt(Y*inv(X)) is named E in paper
                 F = expconstruct*E*expconstruct';
             else
                 % Identity parallel transport works for LBFGS
@@ -165,7 +175,7 @@ M.transp = @transpvec;
     end
 
 % applying vector transport and save a variable for applying fast version
-M.transpstore = @transpvecf;
+M.transpstore = @transpvecf;   %--> Benyamin: this function returns sqrt(Y*inv(X)) and inv(sqrt(Y*inv(X))) --> note: sqrt(Y*inv(X)) is named E in paper
     function [expconstruct,iexpconstruct] = transpvecf(X, Y)
         if flag
             if riemTransp
@@ -233,15 +243,4 @@ M.atranspf = @itranspvecfast;
 
 end
 
-% Linear combination of tangent vectors
-function d = lincomb(x, a1, d1, a2, d2) %#ok<INUSL>
 
-if nargin == 3
-    d = a1*d1;
-elseif nargin == 5
-    d = a1*d1 + a2*d2;
-else
-    error('Bad use of psd.lincomb.');
-end
-
-end

@@ -104,7 +104,17 @@ M.randvec = @randomvec;
         U = U / norm(U,'fro');
     end
 
+% Linear combination of tangent vectors
 M.lincomb = @lincomb;
+    function d = lincomb(x, a1, d1, a2, d2) %#ok<INUSL>
+        if nargin == 3
+            d = a1*d1;
+        elseif nargin == 5
+            d = a1*d1 + a2*d2;
+        else
+            error('Bad use of psd.lincomb.');
+        end
+    end
 
 M.zerovec = @(x) zeros(n);     
 
@@ -243,15 +253,3 @@ M.transpdiffE = @transpvecdiffE;
 
 end
 
-% Linear combination of tangent vectors
-function d = lincomb(x, a1, d1, a2, d2) %#ok<INUSL>
-
-if nargin == 3
-    d = a1*d1;
-elseif nargin == 5
-    d = a1*d1 + a2*d2;
-else
-    error('Bad use of psd.lincomb.');
-end
-
-end
