@@ -34,6 +34,8 @@ M.name = @() sprintf('SPD manifold (%d, %d)', n, n);
 
 M.dim = @() (n*(n-1))/2;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- basic functions:
+
 M.inner = @(X, U, V) real(sum(sum( (X\U).' .* (X\V) ))); %U(:).'*V(:);
 
 M.norm = @(X, U)  sqrt(real(sum(sum( abs(X\U).^2 ))));
@@ -73,6 +75,47 @@ M.ehess2rhess = @ehess2rhess;
         Hess = Hess - sym(eta*sym(egrad)*X);
     end
 
+M.exp = @exponential;
+    function Y = exponential(X, U, t)
+        if nargin == 2
+            t = 1;
+        end
+        Y = retraction(X, U, t);
+    end
+
+M.log = @logarithm;
+    function U = logarithm(X, Y)
+        U = X*logm(X\Y);
+        U = sym(U);
+    end
+
+M.hash = @(X) ['z' hashmd5(X(:))];
+
+M.rand = @random;
+    function X = random()
+        X = randn(n);
+        X = (X*X');
+    end
+
+M.randvec = @randomvec;
+    function U = randomvec(X)
+        U = randn(n);
+        U = sym(U);
+        U = U / norm(U,'fro');
+    end
+
+M.lincomb = @lincomb;
+
+M.zerovec = @(x) zeros(n);     
+
+M.vec = @(x, u_mat) u_mat(:);
+
+M.mat = @(x, u_vec) reshape(u_vec, [n, n]);
+
+M.vecmatareisometries = @() false;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- retraction and transports:
+
 % It is possible to apply retraction several times with different t
 M.retr = @retraction;
     function [Y, store] = retraction(X, U, t, store)
@@ -90,6 +133,63 @@ M.retr = @retraction;
         end
         Y = X + t*U + t^2/2 * store.UinvXmulU;
         Y = sym(Y);        
+    end
+
+if ~exist('sqrtm_triu_real','file')
+    % check if mex files was compiled successfully
+    fast_sqrtm = @(x)sqrtm(x);
+    warning('sqrtm_triu_real should be compiled to improve performace');
+else
+    fast_sqrtm = @(x)sqrtm_fast(x);
+end
+
+% vector transport in line search all arguments except t remains
+% diffE is not necessary for this it is assumed that different E is used
+M.transp = @transpvec;   
+    function [F, store] = transpvec(X, Y, E, U, t, store)
+        if nargin < 5
+            store = struct;
+        end
+        %if ~isfield(store, 'symEinvXmulU')
+        if nargin > 3 %~isempty(U)
+            if ~isfield(store, 'invXmulU')
+                store.invXmulU = X\U;
+            end
+            store.symUinvXmulU = sym(E * store.invXmulU);
+            F = E + t * store.symUinvXmulU;
+        else
+            if nargout > 1
+                store.symUinvXmulU = sym((sqrtm(2*Y/X-eye(n))-eye(n))*E);
+                F = E + t * store.symUinvXmulU;
+            else
+                F = sym(sqrtm(2*Y/X-eye(n))*E);
+            end
+        end
+        %else
+        %    F = E + t * store.symUinvXmulU;
+        %end
+    end   
+
+% Applying vector transport aand save a variable for applying fast version
+%   of vector transport and its adjoint
+% In the fast version only stored variable is given
+M.transpstore = @transpvecstore;
+    function [expconstruct, iexpconstruct] = transpvecstore(X, Y)
+        expconstruct= fast_sqrtm(Y/X);
+        %F = expconstruct * E * expconstruct';
+        iexpconstruct = inv(expconstruct);
+    end
+
+% faster version of vector transport by storing some information
+M.transpf = @transpvecfast; 
+    function F = transpvecfast(expconstruct, E)
+        F = expconstruct * E * expconstruct.';
+    end
+    
+% faster version of adjoint vector transport by storing some information
+M.atranspf = @atranspvecfast; 
+    function F = atranspvecfast(iexpconstruct, E)
+        F = iexpconstruct * E * iexpconstruct.';
     end
 
 M.retrtransp = @retractiontranspvec;
@@ -140,102 +240,6 @@ M.transpdiffE = @transpvecdiffE;
         store.symUinvXmulU = sym(E * invXmulU);
         F = E + t * store.symUinvXmulU;
     end
-
-% vector transport in line search all arguments except t remains
-% diffE is not necessary for this it is assumed that different E is used
-M.transp = @transpvec;   
-    function [F, store] = transpvec(X, Y, E, U, t, store)
-        if nargin < 5
-            store = struct;
-        end
-        %if ~isfield(store, 'symEinvXmulU')
-        if nargin > 3 %~isempty(U)
-            if ~isfield(store, 'invXmulU')
-                store.invXmulU = X\U;
-            end
-            store.symUinvXmulU = sym(E * store.invXmulU);
-            F = E + t * store.symUinvXmulU;
-        else
-            if nargout > 1
-                store.symUinvXmulU = sym((sqrtm(2*Y/X-eye(n))-eye(n))*E);
-                F = E + t * store.symUinvXmulU;
-            else
-                F = sym(sqrtm(2*Y/X-eye(n))*E);
-            end
-        end
-        %else
-        %    F = E + t * store.symUinvXmulU;
-        %end
-    end   
-
-M.exp = @exponential;
-    function Y = exponential(X, U, t)
-        if nargin == 2
-            t = 1;
-        end
-        Y = retraction(X, U, t);
-    end
-
-M.log = @logarithm;
-    function U = logarithm(X, Y)
-        U = X*logm(X\Y);
-        U = sym(U);
-    end
-
-M.hash = @(X) ['z' hashmd5(X(:))];
-
-M.rand = @random;
-    function X = random()
-        X = randn(n);
-        X = (X*X');
-    end
-
-M.randvec = @randomvec;
-    function U = randomvec(X)
-        U = randn(n);
-        U = sym(U);
-        U = U / norm(U,'fro');
-    end
-
-M.lincomb = @lincomb;
-
-M.zerovec = @(x) zeros(n);     
-
-if ~exist('sqrtm_triu_real','file')
-    % check if mex files was compiled successfully
-    fast_sqrtm = @(x)sqrtm(x);
-    warning('sqrtm_triu_real should be compiled to improve performace');
-else
-    fast_sqrtm = @(x)sqrtm_fast(x);
-end
-
-% Applying vector transport aand save a variable for applying fast version
-%   of vector transport and its adjoint
-% In the fast version only stored variable is given
-M.transpstore = @transpvecstore;
-    function [expconstruct, iexpconstruct] = transpvecstore(X, Y)
-        expconstruct= fast_sqrtm(Y/X);
-        %F = expconstruct * E * expconstruct';
-        iexpconstruct = inv(expconstruct);
-    end
-
-% faster version of vector transport by storing some information
-M.transpf = @transpvecfast; 
-    function F = transpvecfast(expconstruct, E)
-        F = expconstruct * E * expconstruct.';
-    end
-    
-% faster version of adjoint vector transport by storing some information
-M.atranspf = @atranspvecfast; 
-    function F = atranspvecfast(iexpconstruct, E)
-        F = iexpconstruct * E * iexpconstruct.';
-    end
-
-M.vec = @(x, u_mat) u_mat(:);
-
-M.mat = @(x, u_vec) reshape(u_vec, [n, n]);
-
-M.vecmatareisometries = @() false;
 
 end
 

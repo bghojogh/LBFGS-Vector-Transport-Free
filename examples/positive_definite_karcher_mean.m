@@ -62,9 +62,14 @@ close all
     % geometry will yield code to compute Karcher means on that other
     % manifold, provided that manifold is equipped with a dist function and
     % a logarithmic map log.
-%     M = sympositivedefinitefactory(n);
-    M = spdfactory(n);
-%     M = spdffactory(n);
+    manifold_version = "mixest_original_fast";   %%---> manifold_version, mixest_original, mixest_original_fast
+    if manifold_version == "manifold_version"
+        M = sympositivedefinitefactory(n);
+    elseif manifold_version == "mixest_original"
+        M = spdffactory(n);
+    elseif manifold_version == "mixest_original_fast"
+        M = spdfactory(n);
+    end
     
     % Define a problem structure, specifying the manifold M, the cost
     % function and its gradient.

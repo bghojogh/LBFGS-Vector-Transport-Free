@@ -39,6 +39,8 @@ M.name = @() sprintf('SPD manifold (%d, %d)', n, n);
 
 M.dim = @() (n*(n-1))/2;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- basic functions:
+
 M.inner = @(X, U, V) real(sum(sum( (X\U).' .* (X\V) ))); %U(:).'*V(:);
 
 M.norm = @(X, U)  sqrt(real(sum(sum( abs(X\U).^2 ))));
@@ -82,20 +84,6 @@ M.ehess2rhess = @ehess2rhess;
         Hess = Hess - sym(eta*sym(egrad)*X);
     end
 
-M.retr = @retraction;
-    function Y = retraction(X, U, t)
-        if nargin < 3
-            t = 1.0;
-        end
-        if flag
-            E = t*U;
-            Y = X * expm(X\E);
-            Y = sym(Y);
-        else
-            Y = X + t*U;
-        end
-    end
-
 M.exp = @exponential;
     function Y = exponential(X, U, t)
         if nargin == 2
@@ -129,6 +117,28 @@ M.lincomb = @lincomb;
 
 M.zerovec = @(x) zeros(n);
 
+M.vec = @(x, u_mat) u_mat(:);
+
+M.mat = @(x, u_vec) reshape(u_vec, [n, n]);
+
+M.vecmatareisometries = @() false;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- retraction and transports:
+
+M.retr = @retraction;
+    function Y = retraction(X, U, t)
+        if nargin < 3
+            t = 1.0;
+        end
+        if flag
+            E = t*U;
+            Y = X * expm(X\E);
+            Y = sym(Y);
+        else
+            Y = X + t*U;
+        end
+    end
+
 if ~exist('sqrtm_triu_real','file')
     % check if mex files was compiled successfully
     fast_sqrtm = @(x)sqrtm(x);
@@ -136,6 +146,7 @@ if ~exist('sqrtm_triu_real','file')
 else
     fast_sqrtm = @(x)sqrtm_fast(x);
 end
+
 M.transp = @transpvec;   
     function F = transpvec(X, Y, E)
         if flag
@@ -153,7 +164,7 @@ M.transp = @transpvec;
         end
     end
 
-% applying vector transpord and save a variable for applying fast version
+% applying vector transport and save a variable for applying fast version
 M.transpstore = @transpvecf;
     function [expconstruct,iexpconstruct] = transpvecf(X, Y)
         if flag
@@ -219,12 +230,6 @@ M.atranspf = @itranspvecfast;
             F = E;
         end
     end
-
-M.vec = @(x, u_mat) u_mat(:);
-
-M.mat = @(x, u_vec) reshape(u_vec, [n, n]);
-
-M.vecmatareisometries = @() false;
 
 end
 
