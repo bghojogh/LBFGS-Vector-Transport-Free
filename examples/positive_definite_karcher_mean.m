@@ -33,6 +33,10 @@ clc
 clear all
 close all
 
+%%%%%%% settings:
+manifold_version = "SPD_VTFree";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
+solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
+
     % Generate some random data to test the function if none is given.
     if ~exist('A', 'var') || isempty(A)
 %         n = 5;
@@ -62,13 +66,14 @@ close all
     % geometry will yield code to compute Karcher means on that other
     % manifold, provided that manifold is equipped with a dist function and
     % a logarithmic map log.
-    manifold_version = "mixest_original_fast";   %%---> manifold_version, mixest_original, mixest_original_fast
-    if manifold_version == "manifold_version"
+    if manifold_version == "SPD_manopt_original"
         M = sympositivedefinitefactory(n);
-    elseif manifold_version == "mixest_original"
+    elseif manifold_version == "SPD_mixest_original"
         M = spdffactory(n);
-    elseif manifold_version == "mixest_original_fast"
+    elseif manifold_version == "SPD_mixest_original_fast"
         M = spdfactory(n);
+    elseif manifold_version == "SPD_VTFree"
+        M = spdfactory_VTFtree(n);
     end
     
     % Define a problem structure, specifying the manifold M, the cost
@@ -123,10 +128,16 @@ close all
     % Issue a call to a solver. Default options are selected.
     % Our initial guess is the first data point. Most solvers work well
     % with this problem. Limited-memory BFGS is one good example:
-%     X = rlbfgs(problem, A(:, :, 1));
-%     X = lbfgs_MIXEST(problem, A(:, :, 1));
-%     [X cost_ info_] = lbfgs_MIXEST(problem, A(:, :, 1))
-    [X cost_ info_] = lbfgs_MIXEST(problem);
+    if solver_type == "LBFG_manopt_original"
+        % X = rlbfgs(problem, A(:, :, 1));
+        X = rlbfgs(problem);
+    elseif solver_type == "LBFG_mixest_original"
+        %[X cost_ info_] = lbfgs_MIXEST(problem, A(:, :, 1));
+        [X cost_ info_] = lbfgs_MIXEST(problem);
+    elseif solver_type == "LBFG_VTFree"
+        [X cost_ info_] = lbfgs_TransportFree(problem);
+    end
+    
     
     %%%%%%%% get the history of optimization:
     [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);

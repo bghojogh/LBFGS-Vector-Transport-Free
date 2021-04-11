@@ -124,6 +124,14 @@ M.mat = @(x, u_vec) reshape(u_vec, [n, n]);
 
 M.vecmatareisometries = @() false;
 
+if ~exist('sqrtm_triu_real','file')
+    % check if mex files was compiled successfully
+    fast_sqrtm = @(x)sqrtm(x);
+    warning('sqrtm_triu_real should be compiled to improve performace');
+else
+    fast_sqrtm = @(x)sqrtm_fast(x);
+end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- retraction and transports:
 
 % It is possible to apply retraction several times with different t
@@ -144,14 +152,6 @@ M.retr = @retraction;
         Y = X + t*U + t^2/2 * store.UinvXmulU;
         Y = sym(Y);        
     end
-
-if ~exist('sqrtm_triu_real','file')
-    % check if mex files was compiled successfully
-    fast_sqrtm = @(x)sqrtm(x);
-    warning('sqrtm_triu_real should be compiled to improve performace');
-else
-    fast_sqrtm = @(x)sqrtm_fast(x);
-end
 
 % vector transport in line search all arguments except t remains
 % diffE is not necessary for this it is assumed that different E is used

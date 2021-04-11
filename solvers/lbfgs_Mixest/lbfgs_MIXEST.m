@@ -11,7 +11,7 @@
 %   Reshad Hosseini, Jun.26,2013: Improving speed when "transpf" is present 
 %
 
-function [x cost info] = lbfgs(problem, x, options)
+function [x cost info] = lbfgs_MIXEST(problem, x, options)
 % Manifold LBFGS minimization algorithm for Manopt.
 %
 % function [x cost info] = lbfgs(problem)

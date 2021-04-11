@@ -10,7 +10,7 @@
 % Change log:
 %
 
-function  p_desc = desc_dir_cal_MIXEST(p, M, grad_diff_all, desc_dir_all, ...
+function  p_desc = desc_dir_cal_TransportFree(p, M, grad_diff_all, desc_dir_all, ...
     x_all, ddgd, gd, corrections , Hdiag, Expc_all, Expci_all)
 %
 %function  p_desc = desc_dir_cal_MIXEST(p, M, grad_diff_all, desc_dir_all, ...
@@ -53,7 +53,7 @@ p_prev = M.lincomb(x_all{corrections+1}, 1, p , - coef, ...
 if isfield(M,'transpf')
     p_invtransp = M.atranspf(Expci_all{corrections},p_prev);
     if corrections >1
-        vec_prec= desc_dir_cal_MIXEST(p_invtransp, M, grad_diff_all, desc_dir_all, ...
+        vec_prec= desc_dir_cal_TransportFree(p_invtransp, M, grad_diff_all, desc_dir_all, ...
             x_all, ddgd, gd, corrections-1, Hdiag, Expc_all, Expci_all);
     else
         vec_prec = M.lincomb(x_all{corrections+1}, Hdiag, p_prev);
@@ -67,7 +67,7 @@ else
         p_invtransp = M.transp(x_all{corrections+1},x_all{corrections},p_prev);
     end
     if corrections >1
-        vec_prec= desc_dir_cal_MIXEST(p_invtransp, M, grad_diff_all, desc_dir_all, ...
+        vec_prec= desc_dir_cal_TransportFree(p_invtransp, M, grad_diff_all, desc_dir_all, ...
             x_all, ddgd, gd, corrections-1, Hdiag);
     else
         vec_prec = M.lincomb(x_all{corrections+1}, Hdiag, p_prev);

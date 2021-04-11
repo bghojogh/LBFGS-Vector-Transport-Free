@@ -1,4 +1,4 @@
-%% |spdfactory|
+%% |spdfactory - Vector Transport Free|
 % Returns a manifold structure to optimize over symmetric positive definite
 % matrices
 %
@@ -23,10 +23,14 @@
 %  Reshad Hosseini, Aug,30,2013: Implementing retr, transp, ehess2rhess
 %  Reshad Hosseini, Jan,14,2014: Improving speed of transp using sqrtm_fast
 %  Reshad Hosseini, Jun,26,2014: Improving mbfgs speed by adding transpF
+%  Reza Godaz, Benyamin Ghojogh, April 11, 2021: Changing operations of SPD manifold for vector transport free operations 
 %
 
-function M = spdfactory(n)   
+function M = spdfactory_VTFtree(n)   
 
+VTFree_flag = true;
+
+%%%%%% the flags "flag" and "riemTransp" are ignored if "VTFree_flag" is true
 flag = true; % flag = true v. t. riemman ; flag=false: v. t. is identitty
 riemTransp = true; % faster to use identity instead of Riemmanian Transp
 % If flag is one then it corresponds to transp of natural metrix
@@ -41,9 +45,23 @@ M.dim = @() (n*(n-1))/2;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- basic functions:
 
-M.inner = @(X, U, V) real(sum(sum( (X\U).' .* (X\V) ))); %U(:).'*V(:);
+M.inner = @inner_product;
+    function inner_prod = inner_product(X, U, V)
+        if VTFree_flag
+            inner_prod = U(:).'*V(:);  %--> equaivalent to trace(U.' * V)
+        else
+            inner_prod = real(sum(sum( (X\U).' .* (X\V) ))); %U(:).'*V(:);
+        end
+    end
 
-M.norm = @(X, U)  sqrt(real(sum(sum( abs(X\U).^2 ))));
+M.norm = @manifold_norm;
+    function the_norm = manifold_norm(X, U)
+        if VTFree_flag
+            the_norm = sqrt(U(:).'*U(:));  %--> equaivalent to trace(U.' * V)
+        else
+            the_norm = sqrt(real(sum(sum( abs(X\U).^2 ))));
+        end
+    end
 
 M.dist = @riem;
 % Riemmanian distance
@@ -71,17 +89,26 @@ M.tangent = M.proj;
 % We obtain the following for Riemmanian Gradient
 M.egrad2rgrad = @egrad2regrad;
     function Up = egrad2regrad(X, U)
-        Up = X * sym(U) * X;
-        if 0z
-            % this gradient corresponding to euclidean innerproduct is slow
-            Up = U;
+        if VTFree_flag
+            sqrt_X = fast_sqrtm(X);
+            Up = sqrt_X * sym(U) * sqrt_X;
+        else
+            Up = X * sym(U) * X;
+            if 0z
+                % this gradient corresponding to euclidean innerproduct is slow
+                Up = U;
+            end
         end
     end
 
 M.ehess2rhess = @ehess2rhess;
     function Hess = ehess2rhess(X, egrad, ehess, eta)
-        Hess = X*sym(ehess)*X + 2*sym(H*sym(egrad)*X);
-        Hess = Hess - sym(eta*sym(egrad)*X);
+        if VTFree_flag
+            %TODO
+        else
+            Hess = X*sym(ehess)*X + 2*sym(H*sym(egrad)*X);
+            Hess = Hess - sym(eta*sym(egrad)*X);
+        end
     end
 
 M.exp = @exponential;
@@ -94,8 +121,14 @@ M.exp = @exponential;
 
 M.log = @logarithm;
     function U = logarithm(X, Y)
-        U = X*logm(X\Y);
-        U = sym(U);
+        if VTFree_flag
+            %TODO ---> it might be different
+            U = X*logm(X\Y);
+            U = sym(U);
+        else
+            U = X*logm(X\Y);
+            U = sym(U);
+        end
     end
 
 M.hash = @(X) ['z' hashmd5(X(:))];
@@ -141,6 +174,18 @@ else
     fast_sqrtm = @(x)sqrtm_fast(x);
 end
 
+M.map_the_vector = @map_the_vector_;
+    function U = map_the_vector_(X, U)
+        if VTFree_flag
+            sqrt_X = fast_sqrtm(X);
+            U = (sqrt_X \ U) / sqrt_X;
+            % inv_sqrt_X = inv(sqrt_X);
+            % U = inv_sqrt_X * U * inv_sqrt_X;
+        else
+            warning('The mode is not vector tranport free but vector mapping is used.');
+        end
+    end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%--------------------------- retraction and transports:
 
 M.retr = @retraction;
@@ -148,45 +193,71 @@ M.retr = @retraction;
         if nargin < 3
             t = 1.0;
         end
-        if flag
+        if VTFree_flag
+            sqrt_X = fast_sqrtm(X);
             E = t*U;
-            Y = X * expm(X\E);
+            Y = sqrt_X * expm(E) * sqrt_X;
             Y = sym(Y);
         else
-            Y = X + t*U;
+            if flag
+                E = t*U;
+                Y = X * expm(X\E);
+                Y = sym(Y);
+            else
+                Y = X + t*U;
+            end
         end
     end
 
 M.transp = @transpvec;    %--> Benyamin: this is parallel transport in paper 
     function F = transpvec(X, Y, E)
-        if flag
-            if riemTransp
-                expconstruct= fast_sqrtm(Y/X);  %--> sqrt(Y*inv(X)) --> note: sqrt(Y*inv(X)) is named E in paper
-                F = expconstruct*E*expconstruct';
+        if VTFree_flag
+            F = E;
+        else
+            if flag
+                if riemTransp
+                    expconstruct= fast_sqrtm(Y/X);  %--> sqrt(Y*inv(X)) --> note: sqrt(Y*inv(X)) is named E in paper
+                    F = expconstruct*E*expconstruct';
+                else
+                    % Identity parallel transport works for LBFGS
+                    % There is also proof for the convergence
+                    F = E;
+                end
             else
-                % Identity parallel transport works for LBFGS
-                % There is also proof for the convergence
+                % identity parallel transport
                 F = E;
             end
-        else
-            % identity parallel transport
-            F = E;
         end
     end
 
 % applying vector transport and save a variable for applying fast version
 M.transpstore = @transpvecf;   %--> Benyamin: this function returns sqrt(Y*inv(X)) and inv(sqrt(Y*inv(X))) --> note: sqrt(Y*inv(X)) is named E in paper
     function [expconstruct,iexpconstruct] = transpvecf(X, Y)
-        if flag
-            if riemTransp
-                expconstruct= fast_sqrtm(Y/X);
-                %F = expconstruct*E*expconstruct';
-                if nargout > 1
-                   iexpconstruct = inv(expconstruct); 
+        if VTFree_flag
+            % warning("The function M.transpstore should not be used for VTFree version because it is not useful at all.");
+            expconstruct = nan;   %--> no need to it in VTFree version
+            iexpconstruct = nan;   %--> no need to it in VTFree version
+        else
+            if flag
+                if riemTransp
+                    expconstruct= fast_sqrtm(Y/X);
+                    %F = expconstruct*E*expconstruct';
+                    if nargout > 1
+                       iexpconstruct = inv(expconstruct); 
+                    end
+                else
+                    % Identity parallel transport works for LBFGS
+                    % There is also proof for the convergence
+                    %F = E;
+                    if nargout > 0
+                        expconstruct = eye(size(X,1));
+                    end
+                    if nargout > 1
+                        iexpconstruct = eye(size(X,1));
+                    end
                 end
             else
-                % Identity parallel transport works for LBFGS
-                % There is also proof for the convergence
+                % identity parallel transport
                 %F = E;
                 if nargout > 0
                     expconstruct = eye(size(X,1));
@@ -194,15 +265,6 @@ M.transpstore = @transpvecf;   %--> Benyamin: this function returns sqrt(Y*inv(X
                 if nargout > 1
                     iexpconstruct = eye(size(X,1));
                 end
-            end
-        else
-            % identity parallel transport
-            %F = E;
-            if nargout > 0
-                expconstruct = eye(size(X,1));
-            end
-            if nargout > 1
-                iexpconstruct = eye(size(X,1));
             end
         end
     end
@@ -216,28 +278,38 @@ M.itransp = @itranspvec;
 % faster version of vector transport by storing some information
 M.transpf = @transpvecfast; 
     function F = transpvecfast(expconstruct, E)
-        if flag
-            if riemTransp
-                F = expconstruct*E*expconstruct';
+        if VTFree_flag
+            % warning("The function M.transpf should not be used for VTFree version because it ignores input expconstruct.");
+            F = E;
+        else
+            if flag
+                if riemTransp
+                    F = expconstruct*E*expconstruct';
+                else
+                    F = E;
+                end
             else
                 F = E;
             end
-        else
-            F = E;
         end
     end
     
 % faster version of inverse vector transport by storing some information
 M.atranspf = @itranspvecfast; 
     function F = itranspvecfast(iexpconstruct, E)
-        if flag
-            if riemTransp
-                F = iexpconstruct*E*iexpconstruct';
+        if VTFree_flag
+            % warning("The function M.atranspf should not be used for VTFree version because it ignores input iexpconstruct.");
+            F = E;
+        else
+            if flag
+                if riemTransp
+                    F = iexpconstruct*E*iexpconstruct';
+                else
+                    F = E;
+                end
             else
                 F = E;
             end
-        else
-            F = E;
         end
     end
 

@@ -11,7 +11,7 @@
 %   Reshad Hosseini, Jun.26,2013: Improving speed when "transpf" is present 
 %
 
-function [x cost info] = lbfgs(problem, x, options)
+function [x cost info] = lbfgs_TransportFree(problem, x, options)
 % Manifold LBFGS minimization algorithm for Manopt.
 %
 % function [x cost info] = lbfgs(problem)
@@ -36,6 +36,7 @@ function [x cost info] = lbfgs(problem, x, options)
 % See also: steepestdescent linesearch
 %
 
+VTFree_flag = true;
 
 % Verify that the problem description is sufficient for the solver.
 if ~canGetCost(problem)
@@ -74,6 +75,9 @@ end
 
 % Compute objective-related quantities for x
 [cost grad storedb] = getCostGrad(problem, x, storedb);
+if VTFree_flag
+    grad = problem.M.map_the_vector(x, grad);
+end
 gradnorm = problem.M.norm(x, grad);
 
 % Iteration counter (at any point, iter is the number of fully executed
@@ -139,17 +143,20 @@ while true
 
     if stats.curiterratio == 0 % This is the last iteration in a mini-batch
         [cost grad storedb] = getCostGrad(problem, x, storedb);
+        if VTFree_flag
+            grad = problem.M.map_the_vector(x, grad);
+        end
         gradnorm = problem.M.norm(x, grad);
         % Update BFGS inverse Hessian matrix and descent direction
         %  It is implemented by unrolling the inverse Hessian update
         if isempty(gd_all)
             desc_dir = problem.M.lincomb(x, 1/gradnorm, grad);
         elseif isfield(problem.M,'transpf')
-            desc_dir = desc_dir_cal_MIXEST(grad, problem.M, grad_diff_all, ...
+            desc_dir = desc_dir_cal_TransportFree(grad, problem.M, grad_diff_all, ...
                 desc_dir_all, x_all, ddgd_all, gd_all, length(gd_all) , H, ...
                 Expc_all, Expci_all);
         else
-            desc_dir = desc_dir_cal_MIXEST(grad, problem.M, grad_diff_all, ...
+            desc_dir = desc_dir_cal_TransportFree(grad, problem.M, grad_diff_all, ...
                 desc_dir_all, x_all, ddgd_all, gd_all, length(gd_all) , H);
         end
         
@@ -179,6 +186,10 @@ while true
         newgrad = lsmem.grad;
     else
         [newcost newgrad storedb] = getCostGrad(problem, newx, storedb);
+    end
+    
+    if VTFree_flag
+        newgrad = problem.M.map_the_vector(newx, newgrad);
     end
     
     costevals = costevals + lsstats.costevals;
@@ -218,12 +229,12 @@ while true
     if isfield(problem.M,'transpf')
         [grad_diff_all, desc_dir_all, x_all, gd_all, ddgd_all, H, ...
             Expc_all, Expci_all] = ...
-            lbfgs_update_MIXEST(newx, problem.M, grad_diff, desc_dir_step, ...
+            lbfgs_update_TransportFree(newx, problem.M, grad_diff, desc_dir_step, ...
             grad_diff_all, desc_dir_all, options.numgrad, x_all, gd_all, ...
             ddgd_all, H, options.verbosity, Expc, Expci, Expc_all, Expci_all);
     else
         [grad_diff_all, desc_dir_all, x_all, gd_all, ddgd_all, H] = ...
-            lbfgs_update_MIXEST(newx, problem.M, grad_diff, desc_dir_step, ...
+            lbfgs_update_TransportFree(newx, problem.M, grad_diff, desc_dir_step, ...
             grad_diff_all, desc_dir_all, options.numgrad, x_all, gd_all, ...
             ddgd_all, H, options.verbosity);
     end
@@ -237,11 +248,11 @@ while true
         if isempty(gd_all)
             desc_dir = problem.M.lincomb(x, 1/newgradnorm, newgrad);
         elseif isfield(problem.M,'transpf')
-            desc_dir = desc_dir_cal_MIXEST(newgrad, problem.M, grad_diff_all, ...
+            desc_dir = desc_dir_cal_TransportFree(newgrad, problem.M, grad_diff_all, ...
                 desc_dir_all, x_all, ddgd_all, gd_all, length(gd_all) , H, ...
                 Expc_all, Expci_all);
         else
-            desc_dir = desc_dir_cal_MIXEST(newgrad, problem.M, grad_diff_all, ...
+            desc_dir = desc_dir_cal_TransportFree(newgrad, problem.M, grad_diff_all, ...
                 desc_dir_all, x_all, ddgd_all, gd_all, length(gd_all) , H);
         end
         
