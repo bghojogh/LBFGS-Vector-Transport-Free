@@ -36,11 +36,14 @@ close all
 %%%%%%% settings:
 manifold_version = "SPD_VTFree";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
 solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
+dimenion_of_matrix = 100;   %%--> 100, 1000, 10000
+start_with_given_initial_point = true;
+use_saved_initial_point = false;
 
     % Generate some random data to test the function if none is given.
     if ~exist('A', 'var') || isempty(A)
 %         n = 5;
-        n = 100;
+        n = dimenion_of_matrix;
         m = 50;
         A = zeros(n, n, m);
         ref = diag(max(.1, 1+.1*randn(n, 1)));
@@ -111,6 +114,16 @@ solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, 
         end
     end
     
+    %%%% set initial point:
+    path_saved_files = "./saved_files/n="+n+"/";
+    if ~exist(path_saved_files, 'dir') || (~use_saved_initial_point)
+        mkdir(path_saved_files)
+        x_initial = problem.M.rand();
+        save(path_saved_files+"x_initial.mat", 'x_initial');
+    else
+        load(path_saved_files+"x_initial");
+    end
+
     % Execute some checks on the derivatives for early debugging.
     % These things can be commented out of course.
     % The slopes should agree on part of the plot at least. In this case,
@@ -129,21 +142,43 @@ solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, 
     % Our initial guess is the first data point. Most solvers work well
     % with this problem. Limited-memory BFGS is one good example:
     if solver_type == "LBFG_manopt_original"
-        % X = rlbfgs(problem, A(:, :, 1));
-        X = rlbfgs(problem);
+        if start_with_given_initial_point
+            %X = rlbfgs(problem, A(:, :, 1));
+            X = rlbfgs(problem, x_initial);
+        else
+            X = rlbfgs(problem);
+        end
     elseif solver_type == "LBFG_mixest_original"
-        %[X cost_ info_] = lbfgs_MIXEST(problem, A(:, :, 1));
-        [X cost_ info_] = lbfgs_MIXEST(problem);
+        if start_with_given_initial_point
+            [X cost_ info_] = lbfgs_MIXEST(problem, x_initial);
+        else
+            [X cost_ info_] = lbfgs_MIXEST(problem);
+        end
     elseif solver_type == "LBFG_VTFree"
-        [X cost_ info_] = lbfgs_TransportFree(problem);
+        if start_with_given_initial_point
+            [X cost_ info_] = lbfgs_TransportFree(problem, x_initial);
+        else
+            [X cost_ info_] = lbfgs_TransportFree(problem);
+        end
     end
     
     
     %%%%%%%% get the history of optimization:
     [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
     
+    %%%%%%%% folder of saving results:
+    path_save = "./saved_files/n="+n+"/solver="+solver_type+"/manifold"+manifold_version+"/";
+    if ~exist(path_save, 'dir')
+        path_save=path_save+"run1/";
+        mkdir(path_save);
+    else 
+        dircontent = dir(path_save);
+        num_dir = sum([dircontent.isdir]) - 2; %-2 to account for the stupid '.' and '..' returned by dir
+        path_save=path_save+"run"+(num_dir+1)+"/";
+        mkdir(path_save);
+    end
+    
     %%%%%%%% plot the history of optimization:
-    path_save = "./saved_files/";
     plot_and_save_figure(cost_list, "cost", path_save)
     plot_and_save_figure(log(cost_list), "log of cost", path_save)
     plot_and_save_figure(grad_norm_list, "gradient norm", path_save)
