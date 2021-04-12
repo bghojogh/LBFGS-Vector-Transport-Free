@@ -74,10 +74,11 @@ if ~exist('x', 'var') || isempty(x)
 end
 
 % Compute objective-related quantities for x
-[cost grad storedb] = getCostGrad(problem, x, storedb);
-if VTFree_flag
-    grad = problem.M.map_the_vector(x, grad);
-end
+[cost grad storedb ] = getCostGrad(problem, x, storedb);
+
+    if VTFree_flag
+        grad = problem.M.map_the_vector(x, grad);
+    end
 gradnorm = problem.M.norm(x, grad);
 
 % Iteration counter (at any point, iter is the number of fully executed
