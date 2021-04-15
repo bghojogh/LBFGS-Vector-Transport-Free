@@ -1,4 +1,4 @@
-function X = positive_definite_karcher_mean(A)
+function problem = positive_definite_karcher_mean(A, dimenion_of_matrix, manifold_version)
 % Computes a Karcher mean of a collection of positive definite matrices.
 %%%%%% for definition of Karcher mean, see --->  https://en.wikipedia.org/wiki/Fr%C3%A9chet_mean
 
@@ -28,23 +28,10 @@ function X = positive_definite_karcher_mean(A)
 % 
 % Change log:
 % 
-  
-clc
-clear all
-close all
-
-%%%%%%% settings:
-manifold_version = "SPD_VTFree";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
-solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
-dimenion_of_matrix = 100;   %%--> 100, 1000, 10000
-start_with_given_initial_point = true;
-use_saved_initial_point = false;
-number_of_runs = 2 ;
-base_dir = "./saved_files/n="+dimenion_of_matrix+"/";
 
     % Generate some random data to test the function if none is given.
     if ~exist('A', 'var') || isempty(A)
-%         n = 5;
+        % n = 5;
         n = dimenion_of_matrix;
         m = 50;
         A = zeros(n, n, m);
@@ -115,42 +102,6 @@ base_dir = "./saved_files/n="+dimenion_of_matrix+"/";
             g = M.lincomb(X, 1, g, -1/m, M.log(X, A(:, :, k)));
         end
     end
-    
-    function [path_save,x_initial] = make_dir_and_init(base_dir_with_run_no,solver,manifold,problem_manifold)
-        path_save= base_dir_with_run_no + solver +"/"+ manifold;
-        if ~exist(path_save, 'dir')
-            mkdir(path_save);
-        end
-        if isfile(base_dir_with_run_no+"x_initial.mat")
-            % File exists.
-            load(base_dir_with_run_no+"x_initial");
-        else
-             % File does not exist.
-            x_initial = problem_manifold.rand();
-            save(base_dir_with_run_no+"x_initial.mat", 'x_initial');
-        end  
-        path_save=path_save+"/";
-    end
-    %%%%%%%% folder of saving results:
-
-    
-    
-%     path_save = "./saved_files/n="+n+"/";
-%     dircontent = dir(path_save);
-%     num_dir = sum([dircontent.isdir]) - 2; %-2 to account for the stupid '.' and '..' returned by dir
-%     run_index = num_dir+1;
-%     path_save=path_save+"run"+(run_index)+"/";
-%     mkdir(path_save);
-% 
-%     %%%% set initial point:
-%     if isfile(path_save+"x_initial.mat")
-%          % File exists.
-%          load(path_save+"x_initial");
-%     else
-%          % File does not exist.
-%          x_initial = problem.M.rand();
-%          save(path_save+"x_initial.mat", 'x_initial');
-%     end
 
     % Execute some checks on the derivatives for early debugging.
     % These things can be commented out of course.
@@ -169,52 +120,5 @@ base_dir = "./saved_files/n="+dimenion_of_matrix+"/";
     % Issue a call to a solver. Default options are selected.
     % Our initial guess is the first data point. Most solvers work well
     % with this problem. Limited-memory BFGS is one good example:
-
-    for run_index=1:number_of_runs
-       base_dir_with_run_no=base_dir+"run"+(run_index)+"/";
-       [path_save,x_initial] = make_dir_and_init(base_dir_with_run_no,solver_type,manifold_version,problem.M);
     
-        if solver_type == "LBFG_manopt_original"
-            if start_with_given_initial_point
-                %X = lbfgs_MANOPT(problem, A(:, :, 1));
-                X = lbfgs_MANOPT(problem, x_initial);
-            else
-                X = lbfgs_MANOPT(problem);
-            end
-        elseif solver_type == "LBFG_mixest_original"
-            if start_with_given_initial_point
-                [X cost_ info_ costevals] = lbfgs_MIXEST(problem, x_initial);
-            else
-                [X cost_ info_ costevals] = lbfgs_MIXEST(problem);
-            end
-        elseif solver_type == "LBFG_VTFree"
-            if start_with_given_initial_point
-                [X cost_ info_ ,costevals] = lbfgs_TransportFree(problem, x_initial);
-            else
-                [X cost_ info_ costevals] = lbfgs_TransportFree(problem);
-            end
-        end
-
-        fprintf('Number of executions of getCostGrad function is : %d\n',costevals);
-        %%%%%%%% get the history of optimization:
-        [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
-
-        %%%%%%%% folder of saving results:
-        %path_save = "./saved_files/n="+n+"/run"+run_index+"/solver="+solver_type+"/manifold"+manifold_version+"/";
-        %if ~exist(path_save, 'dir')
-        %    mkdir(path_save);
-        %end
-
-        %%%%%%%% plot the history of optimization:
-        
-        plot_and_save_figure(cost_list, "cost", path_save+"/")
-        plot_and_save_figure(log(cost_list), "log of cost", path_save)
-        plot_and_save_figure(grad_norm_list, "gradient norm", path_save)
-        plot_and_save_figure(log(grad_norm_list), "log of gradient norm", path_save)
-        plot_and_save_figure(time_iterations, "time of each itr", path_save)
-        plot_and_save_figure(time_list, "time", path_save)
-
-        %%%%%%%% saving the workspace:
-        save(path_save+'workspace.mat');
-    end
 end

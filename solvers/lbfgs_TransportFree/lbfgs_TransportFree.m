@@ -11,7 +11,7 @@
 %   Reshad Hosseini, Jun.26,2013: Improving speed when "transpf" is present 
 %
 
-function [x cost info  costevals] = lbfgs_TransportFree(problem, x, options)
+function [x cost info costevals] = lbfgs_TransportFree(problem, x, options)
 % Manifold LBFGS minimization algorithm for Manopt.
 %
 % function [x cost info] = lbfgs(problem)
@@ -54,7 +54,7 @@ localdefaults.maxiter = 1000;
 localdefaults.tolgradnorm = 1e-6;
 localdefaults.numgrad = 20;
 localdefaults.linesearch = @linesearch_wolfe; %_adaptive
-costevals = 1;
+costevals = 0;
 
 % Merge global and local defaults, then merge w/ user options, if any.
 localdefaults = mergeOptions(getGlobalDefaults(), localdefaults);
@@ -74,7 +74,7 @@ if ~exist('x', 'var') || isempty(x)
 end
 
 % Compute objective-related quantities for x
-[cost grad storedb ] = getCostGrad(problem, x, storedb);
+[cost grad storedb] = getCostGrad(problem, x, storedb);
     if VTFree_flag
         grad = problem.M.map_the_vector(x, grad);
     end
@@ -185,7 +185,7 @@ while true
         newcost = lsmem.cost;
         newgrad = lsmem.grad;
     else
-        [newcost newgrad storedb   ] = getCostGrad(problem, newx, storedb);
+        [newcost newgrad storedb] = getCostGrad(problem, newx, storedb);
     end
     
     if VTFree_flag
