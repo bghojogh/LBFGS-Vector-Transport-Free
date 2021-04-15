@@ -1,4 +1,4 @@
-function [cost, grad, storedb] = getCostGrad(problem, x, storedb)
+function [cost, grad, storedb ] = getCostGrad(problem, x, storedb)
 % Computes the cost function and the gradient at x in one call if possible.
 %
 % function [cost, storedb] = getCostGrad(problem, x, storedb)
@@ -12,9 +12,17 @@ function [cost, grad, storedb] = getCostGrad(problem, x, storedb)
 % This file is part of Manopt: www.manopt.org.
 % Original author: Nicolas Boumal, Dec. 30, 2012.
 % Contributors: 
-% Change log: 
-
-
+% Change log: 4/12/2021 
+% This file changed by Reza Godaz to count number of executions of this
+% function
+    persistent n
+    if isempty(n)
+        n = uint32(1);
+    else
+        n = n+1;
+    end
+    %n_exec = n;
+    %fprintf('%i\n', n)
     if isfield(problem, 'costgrad')
     %% Compute the cost/grad pair using costgrad.
 

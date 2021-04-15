@@ -34,8 +34,8 @@ clear all
 close all
 
 %%%%%%% settings:
-manifold_version = "SPD_mixest_original_fast";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
-solver_type = "LBFG_mixest_original";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
+manifold_version = "SPD_VTFree";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
+solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
 dimenion_of_matrix = 100;   %%--> 100, 1000, 10000
 start_with_given_initial_point = true;
 use_saved_initial_point = false;
@@ -176,26 +176,26 @@ base_dir = "./saved_files/n="+dimenion_of_matrix+"/";
     
         if solver_type == "LBFG_manopt_original"
             if start_with_given_initial_point
-                %X = rlbfgs(problem, A(:, :, 1));
-                X = rlbfgs(problem, x_initial);
+                %X = lbfgs_MANOPT(problem, A(:, :, 1));
+                X = lbfgs_MANOPT(problem, x_initial);
             else
-                X = rlbfgs(problem);
+                X = lbfgs_MANOPT(problem);
             end
         elseif solver_type == "LBFG_mixest_original"
             if start_with_given_initial_point
-                [X cost_ info_] = lbfgs_MIXEST(problem, x_initial);
+                [X cost_ info_ costevals] = lbfgs_MIXEST(problem, x_initial);
             else
-                [X cost_ info_] = lbfgs_MIXEST(problem);
+                [X cost_ info_ costevals] = lbfgs_MIXEST(problem);
             end
         elseif solver_type == "LBFG_VTFree"
             if start_with_given_initial_point
-                [X cost_ info_] = lbfgs_TransportFree(problem, x_initial);
+                [X cost_ info_ ,costevals] = lbfgs_TransportFree(problem, x_initial);
             else
-                [X cost_ info_] = lbfgs_TransportFree(problem);
+                [X cost_ info_ costevals] = lbfgs_TransportFree(problem);
             end
         end
 
-
+        fprintf('Number of executions of getCostGrad function is : %d\n',costevals);
         %%%%%%%% get the history of optimization:
         [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
 

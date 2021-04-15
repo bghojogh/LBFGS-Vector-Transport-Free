@@ -11,7 +11,7 @@
 %   Reshad Hosseini, Jun.26,2013: Improving speed when "transpf" is present 
 %
 
-function [x cost info] = lbfgs_MIXEST(problem, x, options)
+function [x cost info ] = lbfgs_MIXEST(problem, x, options)
 % Manifold LBFGS minimization algorithm for Manopt.
 %
 % function [x cost info] = lbfgs(problem)
@@ -36,7 +36,7 @@ function [x cost info] = lbfgs_MIXEST(problem, x, options)
 % See also: steepestdescent linesearch
 %
 
-
+n_exec_costGrad = 0;
 % Verify that the problem description is sufficient for the solver.
 if ~canGetCost(problem)
     warning('manopt:getCost', ...
@@ -73,7 +73,7 @@ if ~exist('x', 'var') || isempty(x)
 end
 
 % Compute objective-related quantities for x
-[cost grad storedb] = getCostGrad(problem, x, storedb);
+[cost grad storedb costevals] = getCostGrad(problem, x, storedb);
 gradnorm = problem.M.norm(x, grad);
 
 % Iteration counter (at any point, iter is the number of fully executed
@@ -138,7 +138,7 @@ while true
     end
 
     if stats.curiterratio == 0 % This is the last iteration in a mini-batch
-        [cost grad storedb] = getCostGrad(problem, x, storedb);
+        [cost grad storedb ] = getCostGrad(problem, x, storedb);
         gradnorm = problem.M.norm(x, grad);
         % Update BFGS inverse Hessian matrix and descent direction
         %  It is implemented by unrolling the inverse Hessian update
@@ -178,7 +178,7 @@ while true
         newcost = lsmem.cost;
         newgrad = lsmem.grad;
     else
-        [newcost newgrad storedb] = getCostGrad(problem, newx, storedb);
+        [newcost newgrad storedb ] = getCostGrad(problem, newx, storedb);
     end
     
     costevals = costevals + lsstats.costevals;
