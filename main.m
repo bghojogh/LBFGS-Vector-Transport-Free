@@ -8,8 +8,8 @@ addpath(genpath(fullfile("./", 'utils')))
 install;
 
 %% settings:
-solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
-manifold_version = "SPD_VTFree";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
+solver_type = "LBFG_manopt_original";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree
+manifold_version = "SPD_manopt_original";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree
 experiment = "Karcher_mean";  %%--> Karcher_mean
 dimenion_of_matrix = 100;   %%--> 100, 1000, 10000
 start_with_given_initial_point = true;
@@ -39,9 +39,9 @@ for run_index = 1:number_of_runs
     %%%%%%%% solve optimization:
     if solver_type == "LBFG_manopt_original"
         if start_with_given_initial_point
-            [X, cost_, info_, costevals] = lbfgs_MANOPT(problem, x_initial);
+            [X, cost_, info_, op , costevals] = lbfgs_MANOPT(problem, x_initial);
         else
-            [X, cost_, info_, costevals] = lbfgs_MANOPT(problem);
+            [X, cost_, info_, op , costevals] = lbfgs_MANOPT(problem);
         end
     elseif solver_type == "LBFG_mixest_original"
         if start_with_given_initial_point

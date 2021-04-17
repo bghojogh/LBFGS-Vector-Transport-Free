@@ -1,4 +1,4 @@
-function [x, cost, info, options] = rlbfgs(problem, x0, options)
+function [x, cost, info, options,costevals] = rlbfgs(problem, x0, options)
 % Riemannian limited memory BFGS solver for smooth objective functions.
 % 
 % function [x, cost, info, options] = rlbfgs(problem)
@@ -152,6 +152,7 @@ function [x, cost, info, options] = rlbfgs(problem, x0, options)
 
 
     % Verify that the problem description is sufficient for the solver.
+    costevals = 0;
     if ~canGetCost(problem)
         warning('manopt:getCost', ...
                 'No cost provided. The algorithm will likely abort.');
@@ -262,7 +263,8 @@ function [x, cost, info, options] = rlbfgs(problem, x0, options)
     accepted = true;
     
     % Query the cost function and its gradient
-    [xCurCost, xCurGradient] = getCostGrad(problem, xCur, storedb, key);
+    %[xCurCost, xCurGradient] = getCostGrad_Manopt(problem, xCur, storedb, key);
+    [xCurCost, xCurGradient] = getCostGrad_Manopt(problem, xCur, storedb);
     
     xCurGradNorm = M.norm(xCur, xCurGradient);
     
@@ -338,7 +340,7 @@ function [x, cost, info, options] = rlbfgs(problem, x0, options)
                 yHistory, rhoHistory, scaleFactor, min(k, options.memory));
 
         % Execute line-search
-        [stepsize, xNext, newkey, lsstats] = ...
+        [stepsize, xNext,storedb, newkey, lsstats] = ...
             linesearch_hint(problem, xCur, p, xCurCost, ...
                             M.inner(xCur, xCurGradient, p), ...
                             options, storedb, key);
@@ -350,8 +352,8 @@ function [x, cost, info, options] = rlbfgs(problem, x0, options)
         
         
         % Query cost and gradient at the candidate new point.
-        [xNextCost, xNextGrad] = getCostGrad(problem, xNext, storedb, newkey);
-        
+        [xNextCost, xNextGrad] = getCostGrad_Manopt(problem, xNext, storedb, newkey);
+        costevals = costevals + lsstats.costevals;
         % Compute sk and yk
         sk = M.transp(xCur, xNext, step);
         yk = M.lincomb(xNext, 1, xNextGrad, ...
@@ -488,7 +490,8 @@ function [x, cost, info, options] = rlbfgs(problem, x0, options)
             stats.accepted = accepted;
         end
         stats.linesearch = lsstats;
-        stats = applyStatsfun(problem, xCur, storedb, key, options, stats);
+        %stats = applyStatsfun(problem, xCur, storedb, key, options, stats);
+        stats = applyStatsfun(problem, xCur, storedb,  options, stats);
     end
 
 end
