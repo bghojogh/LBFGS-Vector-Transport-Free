@@ -66,6 +66,8 @@ function problem = positive_definite_karcher_mean(A, dimenion_of_matrix, manifol
         M = spdfactory(n);
     elseif manifold_version == "SPD_VTFree"
         M = spdfactory_VTFtree(n);
+    elseif manifold_version == "SPD_VTFreeCholesky"
+        M = spdfactory_VTFtreeCholesky(n);
     end
     
     % Define a problem structure, specifying the manifold M, the cost

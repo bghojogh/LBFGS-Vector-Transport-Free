@@ -26,9 +26,9 @@
 %  Reza Godaz, Benyamin Ghojogh, April 11, 2021: Changing operations of SPD manifold for vector transport free operations 
 %
 
-function M = spdfactory_VTFtree(n)   
+function M = spdfactory_VTFtreeCholesky(n)   
 
-VTFree_flag = true;
+VTFreeCholesky_flag = true;
 
 %%%%%% the flags "flag" and "riemTransp" are ignored if "VTFree_flag" is true
 flag = true; % flag = true v. t. riemman ; flag=false: v. t. is identitty
@@ -47,7 +47,7 @@ M.dim = @() (n*(n-1))/2;
 
 M.inner = @inner_product;
     function inner_prod = inner_product(X, U, V)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             inner_prod = U(:).'*V(:);  %--> equaivalent to trace(U.' * V)
         else
             inner_prod = real(sum(sum( (X\U).' .* (X\V) ))); %U(:).'*V(:);
@@ -56,7 +56,7 @@ M.inner = @inner_product;
 
 M.norm = @manifold_norm;
     function the_norm = manifold_norm(X, U)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             the_norm = sqrt(U(:).'*U(:));  %--> equaivalent to trace(U.' * V)
         else
             the_norm = sqrt(real(sum(sum( abs(X\U).^2 ))));
@@ -89,9 +89,10 @@ M.tangent = M.proj;
 % We obtain the following for Riemmanian Gradient
 M.egrad2rgrad = @egrad2regrad;
     function Up = egrad2regrad(X, U)
-        if VTFree_flag
-            sqrt_X = fast_sqrtm(X);
-            Up = sqrt_X * sym(U) * sqrt_X;
+        if VTFreeCholesky_flag
+            L = chol(X,'lower');
+            Up = L' * sym(U) * L;
+            
         else
             Up = X * sym(U) * X;
             if 0z
@@ -103,7 +104,7 @@ M.egrad2rgrad = @egrad2regrad;
 
 M.ehess2rhess = @ehess2rhess;
     function Hess = ehess2rhess(X, egrad, ehess, eta)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             %TODO
         else
             Hess = X*sym(ehess)*X + 2*sym(H*sym(egrad)*X);
@@ -121,7 +122,7 @@ M.exp = @exponential;
 
 M.log = @logarithm;
     function U = logarithm(X, Y)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             %TODO ---> it might be different
             U = X*logm(X\Y);
             U = sym(U);
@@ -176,11 +177,13 @@ end
 
 M.map_the_vector = @map_the_vector_;
     function U = map_the_vector_(X, U)
-        if VTFree_flag
-            sqrt_X = fast_sqrtm(X);
-            U = (sqrt_X \ U) / sqrt_X;
-            % inv_sqrt_X = inv(sqrt_X);
-            % U = inv_sqrt_X * U * inv_sqrt_X;
+        if VTFreeCholesky_flag
+            %sqrt_X = fast_sqrtm(X);
+            %U = (sqrt_X \ U) / sqrt_X;
+            L=chol(X,'lower');
+            U=(L\U)/(L');
+            %L_inv = inv(L);
+            %U=L_inv*U*L_inv';
         else
             warning('The mode is not vector tranport free but vector mapping is used.');
         end
@@ -193,11 +196,11 @@ M.retr = @retraction;
         if nargin < 3
             t = 1.0;
         end
-        if VTFree_flag
-            sqrt_X = fast_sqrtm(X);
+        if VTFreeCholesky_flag
+            L = chol(X,'lower');
             E = t*U;
-            Y = sqrt_X * expm(E) * sqrt_X;
-            %Y = sym(Y);
+            Y = X * expm((L')\E*L');
+            %Y = sym(Y);            
         else
             if flag
                 E = t*U;
@@ -211,7 +214,7 @@ M.retr = @retraction;
 
 M.transp = @transpvec;    %--> Benyamin: this is parallel transport in paper 
     function F = transpvec(X, Y, E)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             F = E;
         else
             if flag
@@ -233,7 +236,7 @@ M.transp = @transpvec;    %--> Benyamin: this is parallel transport in paper
 % applying vector transport and save a variable for applying fast version
 M.transpstore = @transpvecf;   %--> Benyamin: this function returns sqrt(Y*inv(X)) and inv(sqrt(Y*inv(X))) --> note: sqrt(Y*inv(X)) is named E in paper
     function [expconstruct,iexpconstruct] = transpvecf(X, Y)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             % warning("The function M.transpstore should not be used for VTFree version because it is not useful at all.");
             expconstruct = nan;   %--> no need to it in VTFree version
             iexpconstruct = nan;   %--> no need to it in VTFree version
@@ -278,7 +281,7 @@ M.itransp = @itranspvec;
 % faster version of vector transport by storing some information
 M.transpf = @transpvecfast; 
     function F = transpvecfast(expconstruct, E)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             % warning("The function M.transpf should not be used for VTFree version because it ignores input expconstruct.");
             F = E;
         else
@@ -297,7 +300,7 @@ M.transpf = @transpvecfast;
 % faster version of inverse vector transport by storing some information
 M.atranspf = @itranspvecfast; 
     function F = itranspvecfast(iexpconstruct, E)
-        if VTFree_flag
+        if VTFreeCholesky_flag
             % warning("The function M.atranspf should not be used for VTFree version because it ignores input iexpconstruct.");
             F = E;
         else

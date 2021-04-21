@@ -36,7 +36,7 @@ function [x cost info costevals] = lbfgs_TransportFree(problem, x, options)
 % See also: steepestdescent linesearch
 %
 
-VTFree_flag = true;
+VTFreeCholesky_flag = true;
 
 % Verify that the problem description is sufficient for the solver.
 if ~canGetCost(problem)
@@ -75,7 +75,7 @@ end
 
 % Compute objective-related quantities for x
 [cost grad storedb] = getCostGrad(problem, x, storedb);
-    if VTFree_flag
+    if VTFreeCholesky_flag
         grad = problem.M.map_the_vector(x, grad);
     end
 gradnorm = problem.M.norm(x, grad);
@@ -189,7 +189,7 @@ while true
         [newcost newgrad storedb] = getCostGrad(problem, newx, storedb);
     end
     
-    if VTFree_flag
+    if VTFreeCholesky_flag
         newgrad = problem.M.map_the_vector(newx, newgrad);
     end
     
