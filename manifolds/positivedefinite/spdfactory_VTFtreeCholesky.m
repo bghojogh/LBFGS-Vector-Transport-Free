@@ -28,6 +28,7 @@
 
 function M = spdfactory_VTFtreeCholesky(n)   
 
+retraction_type="expm"; %expm , taylor
 VTFreeCholesky_flag = true;
 
 %%%%%% the flags "flag" and "riemTransp" are ignored if "VTFree_flag" is true
@@ -211,9 +212,14 @@ M.retr = @retraction;
         end
         if VTFreeCholesky_flag
             L = chol(X,'lower');
-            E = t*U;
-            Y = X * expm((L')\E*L');
-            %Y = sym(Y);            
+            if retraction_type=="expm"
+                E = t*U;
+                Y = X * expm((L')\E*L');
+                %Y = sym(Y);
+            else
+                Y = X + L*( t*U + 0.5*t^2* U'*U )*L';
+                %Y = sym(Y);
+            end
         else
             if flag
                 E = t*U;
