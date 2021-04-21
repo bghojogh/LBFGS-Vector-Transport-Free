@@ -132,6 +132,19 @@ M.log = @logarithm;
         end
     end
 
+% M.log = @logarithm;
+%     function U = logarithm(X, Y)
+%         if VTFreeCholesky_flag
+%             %TODO ---> it might be different
+%             L = chol(X,'lower');
+%             U = X * logm((L')\Y*L');
+%             Y = sym(Y);   
+%         else
+%             U = X*logm(X\Y);
+%             U = sym(U);
+%         end
+%     end
+
 M.hash = @(X) ['z' hashmd5(X(:))];
 
 M.rand = @random;

@@ -131,6 +131,19 @@ M.log = @logarithm;
         end
     end
 
+% M.log = @logarithm;
+%     function U = logarithm(X, Y)
+%         if VTFree_flag
+%             %TODO ---> it might be different
+%             sqrt_X = fast_sqrtm(X);
+%             U = sqrt_X * logm(Y) * sqrt_X;
+%             Y = sym(Y);
+%          else
+%             U = X*logm(X\Y);
+%             U = sym(U);
+%          end
+%     end
+
 M.hash = @(X) ['z' hashmd5(X(:))];
 
 M.rand = @random;

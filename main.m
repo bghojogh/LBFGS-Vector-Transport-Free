@@ -8,8 +8,8 @@ addpath(genpath(fullfile("./", 'utils')))
 install;
 
 %% settings:
-solver_type = "LBFG_VTFreeCholesky";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree , LBFG_VTFreeCholesky
-manifold_version = "SPD_VTFreeCholesky";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree , SPD_VTFreeCholesky
+solver_type = "LBFG_VTFree";  %%--> LBFG_manopt_original, LBFG_mixest_original, LBFG_VTFree , LBFG_VTFreeCholesky
+manifold_version = "SPD_VTFree";   %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree , SPD_VTFreeCholesky
 experiment = "Karcher_mean";  %%--> Karcher_mean
 dimenion_of_matrix = 100;   %%--> 100, 1000, 10000
 start_with_given_initial_point = true;
