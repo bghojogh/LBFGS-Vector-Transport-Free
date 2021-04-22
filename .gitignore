@@ -25,3 +25,5 @@ Contents.m
 
 # output/saved files
 saved_files/
+
+examples/*.mat
