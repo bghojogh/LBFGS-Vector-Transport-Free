@@ -26,6 +26,7 @@ for run_index = 1:number_of_runs
     end
     
     %%%%%%%% get optimization problem:
+    
     problem = positive_definite_karcher_mean([], dimenion_of_matrix, manifold_version);
     
     %%%%%%%% generate/get initial point:

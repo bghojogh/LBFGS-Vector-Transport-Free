@@ -30,7 +30,12 @@ function problem = positive_definite_karcher_mean(A, dimenion_of_matrix, manifol
 % 
 
     % Generate some random data to test the function if none is given.
-    if ~exist('A', 'var') || isempty(A)
+    filename =pwd+"/examples/";
+    filename = filename +  dimenion_of_matrix + '.mat';
+    if (~exist('A', 'var') || isempty(A)) && (exist(filename, 'file') == 2)
+            load(filename,'A');
+     % File exists.
+    else
         % n = 5;
         n = dimenion_of_matrix;
         m = 50;
@@ -42,6 +47,7 @@ function problem = positive_definite_karcher_mean(A, dimenion_of_matrix, manifol
             [V, D] = eig(ref + noise);
             A(:, :, i) = V*diag(max(.01, diag(D)))*V';
         end
+        save(filename,'A');
     end
     
     % Retrieve the size of the problem:
