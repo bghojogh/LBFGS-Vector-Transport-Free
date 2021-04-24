@@ -1,0 +1,1 @@
+added new options to pretty plot that change font sizes of different things
