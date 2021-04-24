@@ -28,8 +28,9 @@
 
 function M = spdfactory_VTFtreeCholesky(n)   
 
-retraction_type="expm"; %expm , taylor
 VTFreeCholesky_flag = true;
+global retraction_type;
+% retraction_type = "expm"; %--> expm , taylor  ----> we set it in main.m
 
 %%%%%% the flags "flag" and "riemTransp" are ignored if "VTFree_flag" is true
 flag = true; % flag = true v. t. riemman ; flag=false: v. t. is identitty
@@ -192,8 +193,6 @@ end
 M.map_the_vector = @map_the_vector_;
     function U = map_the_vector_(X, U)
         if VTFreeCholesky_flag
-            %sqrt_X = fast_sqrtm(X);
-            %U = (sqrt_X \ U) / sqrt_X;
             L=chol(X,'lower');
             U=(L\U)/(L');
             %L_inv = inv(L);
@@ -212,11 +211,11 @@ M.retr = @retraction;
         end
         if VTFreeCholesky_flag
             L = chol(X,'lower');
-            if retraction_type=="expm"
+            if retraction_type == "expm"
                 E = t*U;
                 Y = X * expm((L')\E*L');
                 %Y = sym(Y);
-            else
+            elseif retraction_type == "taylor"
                 Y = X + L*( t*U + 0.5*t^2* U'*U )*L';
                 %Y = sym(Y);
             end

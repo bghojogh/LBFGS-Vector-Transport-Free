@@ -29,7 +29,8 @@
 function M = spdfactory_VTFtree(n)   
 
 VTFree_flag = true;
-retraction_type="expm"; %expm , taylor
+global retraction_type;
+% retraction_type = "expm"; %--> expm , taylor  ----> we set it in main.m
 
 %%%%%% the flags "flag" and "riemTransp" are ignored if "VTFree_flag" is true
 flag = true; % flag = true v. t. riemman ; flag=false: v. t. is identitty
@@ -209,11 +210,11 @@ M.retr = @retraction;
         end
         if VTFree_flag
             sqrt_X = fast_sqrtm(X);
-            if retraction_type=="expm"
+            if retraction_type == "expm"
                 E = t*U;
                 Y = sqrt_X * expm(E) * sqrt_X;
                 %Y = sym(Y);
-            else
+            elseif retraction_type == "taylor"
                 Y = X + sqrt_X *( t*U + 0.5* t^2 * U'*U ) * sqrt_X;
                 %Y = sym(Y);
             end

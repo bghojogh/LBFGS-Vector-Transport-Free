@@ -1,4 +1,4 @@
-function [x, cost, info, options,costevals] = rlbfgs(problem, x0, options)
+function [x, cost, info, options,costevals] = lbfgs_MANOPT(problem, x0, options)
 % Riemannian limited memory BFGS solver for smooth objective functions.
 % 
 % function [x, cost, info, options] = rlbfgs(problem)

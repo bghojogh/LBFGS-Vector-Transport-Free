@@ -65,7 +65,13 @@ function M = sympositivedefinitefactory(n)
 %       many values of t, that is, it is cheap to retract many points along
 %       the same tangent direction. This could in principle be exploited to
 %       speed up line-searches.
+%    April 23, 2021 (by Benyamin):
+%       adding the exponential map as an option for retraction. Added the
+%       flag "retraction_type".
     
+    global retraction_type;     %---> although it/retraction is not used in manopt cautious LBFGS
+    % retraction_type = "expm"; %--> expm , taylor  ----> we set it in main.m
+
     symm = @(X) .5*(X+X');
     
     M.name = @() sprintf('Symmetric positive definite geometry of %dx%d matrices', n, n);
@@ -125,9 +131,19 @@ function M = sympositivedefinitefactory(n)
         else
             teta = t*eta;
         end
-        % The symm() call is mathematically unnecessary but numerically
-        % necessary.
-        Y = symm(X + teta + .5*teta*(X\teta));
+        
+%         % The symm() call is mathematically unnecessary but numerically
+%         % necessary.
+%         Y = symm(X + teta + .5*teta*(X\teta));
+        
+        if retraction_type == "expm"
+            Y = X * expm(X\teta);
+            %Y = sym(Y);
+        elseif retraction_type == "taylor"
+            Y = X + teta + .5*teta*(X\teta);
+            %Y = sym(Y);
+        end
+        
     end
     
     M.exp = @exponential;
