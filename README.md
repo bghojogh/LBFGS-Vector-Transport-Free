@@ -16,3 +16,7 @@ The code of another version of Mixest toolbox:
 - https://github.com/utvisionlab/mixest
 - https://github.com/utvisionlab/mixest/tree/master/mixest/auxiliary/manopt_solvers/lbfgs
 - http://visionlab.ut.ac.ir/mixest/
+
+The code of ROPTLIB toolbox:
+- https://github.com/whuang08/ROPTLIB
+- https://github.com/whuang08/ROPTLIB/tree/master/Solvers
