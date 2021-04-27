@@ -5,7 +5,7 @@ This project reduces vector transport and Riemannian metric to identity and Eucl
 
 ## Additional notes (related codes)
 
-The code of cautious LBFGS in manopt toolbox and its cautious RLBFGS solver: 
+The code of manopt toolbox and its cautious RLBFGS solver: 
 - https://github.com/NicolasBoumal/manopt
 - https://github.com/NicolasBoumal/manopt/blob/master/manopt/solvers/bfgs/rlbfgs.m
 
