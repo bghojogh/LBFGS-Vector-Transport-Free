@@ -3,9 +3,9 @@
 The code for vector transport free LBFGS quasi-Newton's optimization on the Symmetric Positive Definite Riemannian manifolds.
 This project reduces vector transport and Riemannian metric to identity and Euclidean inner product, respectively. 
 
-## Additional notes (related codes):
+## Additional notes (related codes)
 
-The code of cautious LBFGS in manopt: 
+The code of cautious LBFGS in manopt toolbox: 
 - https://github.com/NicolasBoumal/manopt/blob/master/manopt/solvers/bfgs/rlbfgs.m
 
 The code of Mixest toolbox: 
@@ -14,4 +14,5 @@ The code of Mixest toolbox:
 
 The code of another version of Mixest toolbox:
 - https://github.com/utvisionlab/mixest
+- https://github.com/utvisionlab/mixest/tree/master/mixest/auxiliary/manopt_solvers/lbfgs
 - http://visionlab.ut.ac.ir/mixest/
