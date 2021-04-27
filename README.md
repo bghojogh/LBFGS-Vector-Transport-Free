@@ -1,10 +1,14 @@
 # Vector Transport Free LBFGS on Riemannian Manifolds
 
-The code for vector transport free LBFGS quasi-Newton's optimization on the Riemannian manifolds
+The code for vector transport free LBFGS quasi-Newton's optimization on the Symmetric Positive Definite Riemannian manifolds.
+This project reduces vector transport and Riemannian metric to identity and Euclidean inner product, respectively. 
 
-This code is a modification of the following codes in the manopt and pymanopt libraries: 
+Additional notes (related codes):
+The code of cautious LBFGS in manopt: 
 - https://github.com/NicolasBoumal/manopt/blob/master/manopt/solvers/bfgs/rlbfgs.m
-- https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/linesearch.py
-
-
-
+The code of Mixest toolbox: 
+- http://visionlab.ut.ac.ir/resources/riemmix.zip
+- http://visionlab.ut.ac.ir/resources.html
+The code of another version of Mixest toolbox:
+- https://github.com/utvisionlab/mixest
+- http://visionlab.ut.ac.ir/mixest/
