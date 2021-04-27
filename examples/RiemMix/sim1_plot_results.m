@@ -1,4 +1,4 @@
-function sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT)
+function info_ = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT)
 
 
 if nargin < 5
@@ -46,7 +46,7 @@ methods = fieldnames(METHODS);
 for imethod = 1:numel(methods)
     method = methods{imethod}
     
-    [time_run, iter_run, pll_run, ll_run, mu_mse_run, sigma_mse_run] = ...
+    [time_run, iter_run, pll_run, ll_run, mu_mse_run, sigma_mse_run, info_] = ...
         sim1_cost_mse_likelihood_results(method, DIM, SEP, INIT, K, N, E, run, RESFOLDER);
     
     

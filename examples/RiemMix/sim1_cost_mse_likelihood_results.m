@@ -1,4 +1,4 @@
-function [time_run, iter_run, pll_run, ll_run, mu_mse_run, sigma_mse_run] = ...
+function [time_run, iter_run, pll_run, ll_run, mu_mse_run, sigma_mse_run, info_] = ...
     sim1_cost_mse_likelihood_results(method, DIM, SEP, INIT, K, N, E, run, RESFOLDER)
 %
 %
@@ -53,6 +53,9 @@ end
 
 % tiny problem in saved files
 f.results = f.results(:,1:end-1);
+
+% Benyamin added for saving info:
+info_ = f.results;
 
 [d1,d2] = size([f.results.cost]);
 pll_all = reshape(-[f.results.cost], [d1,d2]);

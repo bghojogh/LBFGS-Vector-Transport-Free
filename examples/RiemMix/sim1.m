@@ -1,4 +1,4 @@
-function sim1(KIN, DIMS, SEPS, KS, NDIM, ES, INITS, SELECT)
+function info_list = sim1(KIN, DIMS, SEPS, KS, NDIM, ES, INITS, SELECT, path_save)
 nargin
 if nargin < 1
     KIN = 11;
@@ -48,8 +48,8 @@ for KK = KIN:KIN
 %     PLOTFOLDER = sprintf('plots%d',KK);
 %     eval(['!mkdir ' RESFOLDER])
 %     eval(['!mkdir ' PLOTFOLDER])
-    RESFOLDER = sprintf('saved_files/RiemMix/run%d/result',KK);
-    PLOTFOLDER = sprintf('saved_files/RiemMix/run%d/plots',KK);
+    RESFOLDER = sprintf("%s/result",path_save);
+    PLOTFOLDER = sprintf("%s/plots",path_save);
     if ~exist(RESFOLDER, 'dir')
         mkdir(RESFOLDER);
     end
@@ -61,16 +61,13 @@ for KK = KIN:KIN
         for E = ES
             for K = KS
                 for DIM = DIMS
-                    
                     % Number of data
                     for N = (NDIM* DIM^2)
                         for iinit = 1:numel(INITS)
                             INIT = INITS{iinit};
                             for isep = 1:numel(SEPS)
                                 SEP = SEPS{isep};
-                                
                                 sim1_run(DIM, SEP, INIT, K, N, E, RESFOLDER)
-                                
                             end
                         end
                     end
@@ -80,18 +77,19 @@ for KK = KIN:KIN
         end
     end
     
+    counter = 1;
     if true
         for E = ES
             for K = KS
-                for DIM = DIMS;
-                    
+                for DIM = DIMS
                     % Number of data
                     for N = (NDIM* DIM^2)
                         for iinit = 1:numel(INITS)
                             INIT = INITS{iinit};
                             for isep = 1:numel(SEPS)
                                 SEP = SEPS{isep};
-                                sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT)
+                                info_list{counter} = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT);
+                                counter = counter + 1;
                                 close all
                             end
                         end
