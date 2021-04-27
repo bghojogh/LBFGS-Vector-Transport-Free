@@ -6,16 +6,17 @@ This project reduces vector transport and Riemannian metric to identity and Eucl
 ## Additional notes (related codes)
 
 The code of cautious LBFGS in manopt toolbox and its cautious RLBFGS solver: 
+- https://github.com/NicolasBoumal/manopt
 - https://github.com/NicolasBoumal/manopt/blob/master/manopt/solvers/bfgs/rlbfgs.m
 
 The code of Mixest toolbox (it includes its RLBFGS solver): 
-- http://visionlab.ut.ac.ir/resources/riemmix.zip
 - http://visionlab.ut.ac.ir/resources.html
+- http://visionlab.ut.ac.ir/resources/riemmix.zip
 
 The code of another version of Mixest toolbox and its RLBFGS solver:
 - https://github.com/utvisionlab/mixest
-- https://github.com/utvisionlab/mixest/tree/master/mixest/auxiliary/manopt_solvers/lbfgs
 - http://visionlab.ut.ac.ir/mixest/
+- https://github.com/utvisionlab/mixest/tree/master/mixest/auxiliary/manopt_solvers/lbfgs
 
 The code of ROPTLIB toolbox and its RBFGS and RLBFGS solvers:
 - https://github.com/whuang08/ROPTLIB
