@@ -48,8 +48,8 @@ for KK = KIN:KIN
 %     PLOTFOLDER = sprintf('plots%d',KK);
 %     eval(['!mkdir ' RESFOLDER])
 %     eval(['!mkdir ' PLOTFOLDER])
-    RESFOLDER = sprintf("%s/result",path_save);
-    PLOTFOLDER = sprintf("%s/plots",path_save);
+    RESFOLDER = sprintf("%sresult",path_save);
+    PLOTFOLDER = sprintf("%splots",path_save);
     if ~exist(RESFOLDER, 'dir')
         mkdir(RESFOLDER);
     end
@@ -88,7 +88,16 @@ for KK = KIN:KIN
                             INIT = INITS{iinit};
                             for isep = 1:numel(SEPS)
                                 SEP = SEPS{isep};
-                                info_list{counter} = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT);
+                                info_list(counter).info_list = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT);
+                                info_list_(counter).eccentricity = E;
+                                info_list(counter).components = K;
+                                info_list(counter).dim = DIM;
+                                info_list(counter).separation = SEP;
+                                info_list(counter).n_data = N;
+                                info_list(counter).select_mode=SELECT;                                
+                                info_list(counter).iinit=INIT;                                
+                                info_list(counter).result_folder=RESFOLDER;                                
+                                info_list(counter).plot_folder=PLOTFOLDER;                                
                                 counter = counter + 1;
                                 close all
                             end

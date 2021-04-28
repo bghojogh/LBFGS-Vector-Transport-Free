@@ -22,7 +22,7 @@ DIMS = [dimenion_of_matrix]; % Dimension
 SEPS = {'low','mid','high'}; % Separation
 KS = [2]; % Number of Components
 %NDIM = [10 100 1000]; % Number of Data = NDIM*DIM^2
-NDIM = [100]; % Number of Data = NDIM*DIM^2
+NDIM = [10 100]; % Number of Data = NDIM*DIM^2
 ES = [10]; % Eccentricity
 INITS = {'kmeanspp'}; % Initialization
 iter_End = 2; % Number of Runs
@@ -46,6 +46,9 @@ end
 
 %% optimization runs:
 base_dir = "./saved_files/" + experiment + "/dim=" + dimenion_of_matrix + "/";
+%paths=[]; %{'','','','','','','','',''};
+%path_ind=1;
+info_ind=1;
 for run_index = 1:number_of_runs
     if experiment == "Karcher_mean"
         path_of_initial_point = base_dir + "run" + (run_index) + "/"; 
@@ -101,26 +104,46 @@ for run_index = 1:number_of_runs
         path_save = sprintf("saved_files/RiemMix/dim=%d/run%d/", dimenion_of_matrix, run_index);
         record_command_window(path_save+"plots2/", "on")
         info_list = sim1(1, DIMS, SEPS, KS, NDIM, ES, INITS, SELECT, path_save);
-        for isep = 1:numel(SEPS)
-            SEP = SEPS{isep};
-            plot_results(SEP, info_list{isep}, path_save)
+        for i = info_ind:size(info_list,2)+info_ind -1  %length(fieldnames(info_list))-1
+            temp_ind = i-info_ind+1;
+            run = "run"+run_index;
+            info_list(temp_ind).run = run;
+            all_info(i)=info_list(temp_ind);
+            all_info(i).run= run;
+            plot_results(info_list(temp_ind), path_save);
         end
+        info_ind = info_ind + size(info_list,2);
+
+%         for isep = 1:numel(SEPS)
+%             SEP = SEPS{isep};
+%             plot_results(SEP, info_list{isep}, path_save)
+%         end
         record_command_window(path_save, "off");
     end
     %%%%%%%% saving the workspace:
-    save(path_save+"workspace.mat");
+    %paths(path_ind)=path_save;
+    %path_ind = path_ind+1;
+    %save(pwd+"/paths","paths");
 end
+save(pwd+"/all_info.mat","all_info");
 
-function plot_results(name, info_, path_save, costevals)
+
+
+function plot_results(info_, path_save, costevals)
     %%%%%%%% get the history of optimization:
-    [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
+    name = info_.separation;
+    n_data = info_.n_data;
+    select_mode = info_.select_mode;
+    sub_name = "";
+    sub_name = "sim1_init_dim("+info_.dim +")_N("+n_data+")_sep("+name+")_mode("+select_mode+")";
+    [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_.info_list);
     %%%%%%%% plot the history of optimization:
-    plot_and_save_figure(cost_list, "cost_"+name, "cost", path_save+"/")
-    plot_and_save_figure(log(cost_list), "log of cost_"+name, "log of cost", path_save)
-    plot_and_save_figure(grad_norm_list, "gradient norm_"+name, "gradient norm", path_save)
-    plot_and_save_figure(log(grad_norm_list), "log of gradient norm_"+name, "log of gradient norm", path_save)
-    plot_and_save_figure(time_iterations, "time of each itr_"+name, "time of each iteration", path_save)
-    plot_and_save_figure(time_list, "time_"+name, "time", path_save)
+    plot_and_save_figure(cost_list, "cost_"+sub_name, "cost", path_save);
+    plot_and_save_figure(log(cost_list), "log of cost_"+sub_name, "log of cost", path_save);
+    plot_and_save_figure(grad_norm_list, "gradient norm_"+sub_name, "gradient norm", path_save);
+    plot_and_save_figure(log(grad_norm_list), "log of gradient norm_"+sub_name, "log of gradient norm", path_save);
+    plot_and_save_figure(time_iterations, "time of each itr_"+sub_name, "time of each iteration", path_save);
+    plot_and_save_figure(time_list, "time_"+sub_name, "time", path_save);
     if nargin > 3
         fprintf('Number of executions of getCostGrad function is : %d\n', costevals);
         save(path_save+'costevals.txt', 'costevals', '-ASCII');
