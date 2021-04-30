@@ -72,7 +72,7 @@ if K > 1
     end
     
     if true
-        METHODS.LBFGS1.legend = 'LBFGS, Usual MVN VTFree';
+        METHODS.LBFGS1.legend = 'VTF-RLBFGS';
         METHODS.LBFGS1.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
         METHODS.LBFGS1.ComponentD = mvnfactory_VTFree(DIM);
         METHODS.LBFGS1.options.solver = 'lbfgs_TransportFree';
@@ -81,28 +81,46 @@ if K > 1
     end
     
     if true
-        METHODS.LBFGS2.legend = 'LBFGS, Usual MVN';
+        METHODS.LBFGS2.legend = 'VTF-Cholesky-RLBFGS';
         METHODS.LBFGS2.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS2.ComponentD = mvnfactory(DIM);
-        METHODS.LBFGS2.options.solver = 'lbfgs_MIXEST';
+        METHODS.LBFGS2.ComponentD = mvnfactory_VTFreeCholesky(DIM);
+        METHODS.LBFGS2.options.solver = 'lbfgs_TransportFreeCholesky';
         % added by Reza
         METHODS.LBFGS2.options.penalize=false;
-        
+    end
+    
+    if true
+        METHODS.LBFGS3.legend = 'RLBFGS';
+        METHODS.LBFGS3.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS3.ComponentD = mvnfactory(DIM);
+        METHODS.LBFGS3.options.solver = 'lbfgs_MIXEST';
+        % added by Reza
+        METHODS.LBFGS3.options.penalize=false;
+    end
+    
+    if true
+        METHODS.LBFGS4.legend = 'Cautious RLBFGS';
+        METHODS.LBFGS4.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+%         METHODS.LBFGS4.ComponentD = mvnfactory_manopt(DIM);
+        METHODS.LBFGS4.ComponentD = mvnfactory(DIM);
+        METHODS.LBFGS4.options.solver = 'lbfgs_MANOPT';
+        % added by Reza
+        METHODS.LBFGS4.options.penalize=false;
     end
 
     if false
-        METHODS.LBFGS3.legend = 'LBFGS, Reparameterized MVN';
-        METHODS.LBFGS3.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS3.ComponentD = mvn2factory(DIM);
-        METHODS.LBFGS3.options.penalize = true;
-        METHODS.LBFGS3.options.solver = 'lbfgs';
+        METHODS.LBFGS5.legend = 'LBFGS, Reparameterized MVN';
+        METHODS.LBFGS5.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS5.ComponentD = mvn2factory(DIM);
+        METHODS.LBFGS5.options.penalize = true;
+        METHODS.LBFGS5.options.solver = 'lbfgs';
     end
     
     if false
-        METHODS.LBFGS3.legend = 'LBFGS, Factorized MVN';
-        METHODS.LBFGS3.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS3.ComponentD = mvn2trilfactory(DIM);
-        METHODS.LBFGS3.options.solver = 'lbfgs';
+        METHODS.LBFGS6.legend = 'LBFGS, Factorized MVN';
+        METHODS.LBFGS6.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS6.ComponentD = mvn2trilfactory(DIM);
+        METHODS.LBFGS6.options.solver = 'lbfgs';
     end
     
     if false

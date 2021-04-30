@@ -29,7 +29,7 @@ for i = 1:numel(SEP)
     % save
     data = X(1:N , :).';
     sep = SEP(i).name;
-    filename = sprintf('%s/sim1_data_dim(%d)_K(%d)_N(%d)_E(%d)_sep(%s)', RESFOLDER, DIM, K, N, e, sep)
+    filename = sprintf('%s/sim1_data_dim(%d)_K(%d)_N(%d)_E(%d)_sep(%s)', RESFOLDER, DIM, K, N, e, sep);
     save(filename, 'data', 'gen_ll', 'sep', 'DIM', 'K', 'theta_gen')
 
     

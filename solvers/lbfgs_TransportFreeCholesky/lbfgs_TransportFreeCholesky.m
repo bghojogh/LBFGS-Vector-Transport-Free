@@ -36,7 +36,12 @@ function [x cost info costevals] = lbfgs_TransportFree(problem, x, options)
 % See also: steepestdescent linesearch
 %
 
-VTFreeCholesky_flag = true;
+% VTFreeCholesky_flag = true;
+if isfield(problem.M, 'map_the_vector')
+    VTFreeCholesky_flag = true;
+else
+    VTFreeCholesky_flag = false;
+end
 
 % Verify that the problem description is sufficient for the solver.
 if ~canGetCost(problem)

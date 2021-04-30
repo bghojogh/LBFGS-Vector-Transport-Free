@@ -36,6 +36,7 @@ function [x cost info costevals] = lbfgs_TransportFree(problem, x, options)
 % See also: steepestdescent linesearch
 %
 
+% VTFree_flag = true;
 if isfield(problem.M, 'map_the_vector')
     VTFree_flag = true;
 else

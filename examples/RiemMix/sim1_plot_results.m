@@ -1,4 +1,4 @@
-function info_ = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT)
+function infos = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT)
 
 
 if nargin < 5
@@ -44,11 +44,12 @@ iplot = 0;
 ma = -Inf;
 methods = fieldnames(METHODS);
 for imethod = 1:numel(methods)
-    method = methods{imethod}
+    method = methods{imethod};
     
     [time_run, iter_run, pll_run, ll_run, mu_mse_run, sigma_mse_run, info_] = ...
         sim1_cost_mse_likelihood_results(method, DIM, SEP, INIT, K, N, E, run, RESFOLDER);
-    
+    infos(imethod).info=info_;
+    infos(imethod).method = method;
     
     iplot = iplot+1;
     
@@ -152,7 +153,7 @@ end
 
 pp_options.logScale = LOG_SCALE;
 
-figure('Name', pngfile)
+figure('Name', pngfile, 'visible', 'off')
 prettyPlot(xData, yData, pp_options);
 saveas(gcf, pngfile, 'png')
 %matlab2tikz(texfile);

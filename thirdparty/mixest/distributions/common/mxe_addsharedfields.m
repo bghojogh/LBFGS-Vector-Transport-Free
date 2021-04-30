@@ -29,6 +29,11 @@ function D = mxe_addsharedfields(D, notshared)
 % |estimate|
     D.estimate = @estimate;
     function [varargout] = estimate(varargin)
+        %[varargout{1:nargout}] = mxe_estimate(D, varargin{:}); 
+        
+        % Reza and Benyamin added option for stopping criterion
+        % varargin{2}.stopfun="gradnorm";
+        % varargin{2}.tolcostdiff = 1.0000e-10;
         [varargout{1:nargout}] = mxe_estimate(D, varargin{:}); 
     end
 

@@ -114,6 +114,10 @@ for imethod = 1:numel(methods)
             [theta, unused, info] = D.estimate(data, options);
         end
         
+        if isfield(info,"accepted")
+            info = rmfield(info,"accepted");
+        end
+        
         infoSize = numel(info);
         results(run, 1:infoSize) = info;
         max_infoSize = max(max_infoSize, infoSize);

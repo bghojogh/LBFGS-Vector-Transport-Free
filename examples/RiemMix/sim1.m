@@ -1,5 +1,5 @@
 function info_list = sim1(KIN, DIMS, SEPS, KS, NDIM, ES, INITS, SELECT, path_save)
-nargin
+% nargin
 if nargin < 1
     KIN = 11;
 end
@@ -76,6 +76,8 @@ for KK = KIN:KIN
             end
         end
     end
+    
+    fprintf('\nOptimization is done. Starting to get and plot the results...\n')
     
     counter = 1;
     if true

@@ -69,7 +69,7 @@ while 1
     end
     
     if ~error
-        theta.p = W
+        theta.p = W;
         for j = 1:k
             L = diag(Ls{j}).^2/100;
             msg = 1;
@@ -109,7 +109,7 @@ while 1
 end
 
 
-trials
+% trials
 L = em_gauss(X,M,R);
 F = L*W;
 F(find(F < eps)) = eps;
