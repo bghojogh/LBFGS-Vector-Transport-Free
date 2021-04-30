@@ -14,8 +14,8 @@ The code of Mixest toolbox (it includes its RLBFGS solver):
 - http://visionlab.ut.ac.ir/resources/riemmix.zip
 
 The code of another version of Mixest toolbox and its RLBFGS solver:
-- https://github.com/utvisionlab/mixest
 - http://visionlab.ut.ac.ir/mixest/
+- https://github.com/utvisionlab/mixest
 - https://github.com/utvisionlab/mixest/tree/master/mixest/auxiliary/manopt_solvers/lbfgs
 
 The code of ROPTLIB toolbox and its RBFGS and RLBFGS solvers:
