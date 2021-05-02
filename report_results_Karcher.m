@@ -4,14 +4,14 @@ clear all
 close all
 
 %% Settings:
-experiment = "Karcher_mean";  %%--> Karcher_mean, RiemMix
+experiment = "Karcher_mean";  %%--> Karcher_mean, RiemMix --> it should be Karcher_mean in this file
 retraction_type = "expm"; %--> expm , taylor
 dimenion_of_matrix = 100;
 n_runs = 2;
 legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS (Wolfe)', 'RLBFGS (Cautious)'};
 iterations_to_report = {1, 2, "last"};
 plot_again = true;
-average_results_again = false;
+average_results_again = true;
 
 %% load results
 methods = {'RLBFGS_Wolfe_VTFree_'+retraction_type, 'RLBFGS_Wolfe_VTFreeCholesky_'+retraction_type, 'RLBFGS_Wolfe_'+retraction_type, 'RLBFGS_cautious'}; 

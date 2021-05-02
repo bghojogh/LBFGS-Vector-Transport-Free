@@ -4,8 +4,8 @@ clear all
 close all
 
 %% Settings:
-experiment = "RiemMix";  %%--> Karcher_mean, RiemMix
-plot_again = false;
+experiment = "RiemMix";  %%--> Karcher_mean, RiemMix --> it should be RiemMix in this file
+plot_again = true;
 average_results_again = true;
 
 %% load results
@@ -13,6 +13,7 @@ path = pwd+"/saved_files/"+experiment+"/all_info.mat";
 load(path);  %--> load all_info.mat
 
 %% plot results
+%%%%%%% Note: You can set some of the methods "false" in the function get_methods.m (in path ./examples/RiemMax/) to exclude some of the methods in plots
 if plot_again
     legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS (Wolfe)', 'RLBFGS (Cautious)'};
     for experiment_index = 1:length(all_info)
@@ -27,7 +28,7 @@ if plot_again
         RESFOLDER = info_.result_folder;
         %PLOTFOLDER = info_.plot_folder;
         tmp = info_.plot_folder.split("plots");
-        PLOTFOLDER = tmp(1) + "plots_final";
+        PLOTFOLDER = tmp(1) + "plots_final";  %--> tmp(1) + "plots_final"; or tmp(1) + "plots_final2"; or ... --> can rename not to overwrite previous plots
         if ~exist(PLOTFOLDER, 'dir')
            mkdir(PLOTFOLDER)
         end
@@ -38,9 +39,9 @@ end
 %% average results
 SEPS = {'low','mid','high'}; % Separation
 methods = {'LBFGS1', 'LBFGS2', 'LBFGS3', 'LBFGS4'};
-N_list = {40, 400};
-n_runs = 2;
-iterations_to_report = {10, 25, "last"};
+N_list = {400};  %--> {40, 400};
+n_runs = 10;
+iterations_to_report = {10, 20, "last"};  %--> {10, 20, "last"}, {20, 50, "last"}
 if average_results_again
     costs_list = zeros(n_runs, length(SEPS), length(methods), length(N_list), length(iterations_to_report));
     n_iterations_list = zeros(n_runs, length(SEPS), length(methods), length(N_list));
@@ -97,7 +98,7 @@ if average_results_again
     %--> take mean and std:
     path_ = RESFOLDER.split("run");
     fid = fopen(path_(1)+'/results.txt', 'wt');
-    fprintf(fid, 'SEP \t Method \t N \t itr=%d \t itr=%d \t itr=last \t n_iters \t time \n', iterations_to_report{1}, iterations_to_report{2});
+    fprintf(fid, 'SEP \t Method \t N \t itr=%d \t itr=%d \t itr=last \t n_iters \t time \t average time \n', iterations_to_report{1}, iterations_to_report{2});
     fprintf(fid, '=============================================== \n');
     cost_mean_along_runs = mean(costs_list, 1); z = size(cost_mean_along_runs); cost_mean_along_runs = reshape(cost_mean_along_runs, [z(2:end) 1]);
     cost_std_along_runs = std(costs_list, 1); z = size(cost_std_along_runs); cost_std_along_runs = reshape(cost_std_along_runs, [z(2:end) 1]);

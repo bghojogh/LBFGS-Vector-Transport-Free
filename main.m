@@ -10,18 +10,23 @@ install;
 %% general settings:
 global retraction_type; retraction_type = "expm"; %--> expm , taylor
 experiment = "Karcher_mean";  %%--> Karcher_mean, RiemMix
-number_of_runs = 2;
-dimenion_of_matrix = 100;   %%--> 2, 100, 1000, 10000
+number_of_runs = 10;
+if experiment == "Karcher_mean"
+    dimenion_of_matrix = 100;   %%--> for RiemMix: 2 / for Karcher_mean: 100
+elseif experiment == "RiemMix"
+    dimenion_of_matrix = 2;   %%--> for RiemMix: 2 / for Karcher_mean: 100
+end
 
 %% settings for Karcher mean:
-solver_type = "RLBFGS_cautious";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
+solver_type = "RLBFGS_Wolfe_VTFree";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
 start_with_given_initial_point = true;
 
-%% settings for RiemMix:
+%% settings for RiemMix: 
+%%%%--> note: For the RiemMix experiment, code solves using all algorithms (solvers) (by for loops) and saves the results
 DIMS = [dimenion_of_matrix]; % Dimension
 SEPS = {'low','mid','high'}; % Separation
 KS = [2]; % Number of Components
-NDIM = [10 100]; % Number of Data = NDIM*(DIM^2)
+NDIM = [100]; % Number of Data = NDIM*(DIM^2)  ---> example: [10 100]
 ES = [10]; % Eccentricity
 INITS = {'kmeanspp'}; % Initialization --> 'default', 'kmeans', 'kmeanspp'
 SELECT = 'PLL'; % 'SIGMA', 'PLL', 'MU'
@@ -126,7 +131,7 @@ elseif experiment == "RiemMix"
 end
 
 
-
+%% some functions:
 function plot_results(name, info_, path_save, costevals)
     %%%%%%%% get the history of optimization:
     [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
