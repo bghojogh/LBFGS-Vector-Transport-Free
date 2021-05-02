@@ -45,6 +45,7 @@ if average_results_again
     costs_list = zeros(n_runs, length(SEPS), length(methods), length(N_list), length(iterations_to_report));
     n_iterations_list = zeros(n_runs, length(SEPS), length(methods), length(N_list));
     time_list = zeros(n_runs, length(SEPS), length(methods), length(N_list));
+    time_average_list = zeros(n_runs, length(SEPS), length(methods), length(N_list));
     for experiment_index = 1:length(all_info)
         info_ = all_info(experiment_index);
 %         for run_index = 1:n_runs
@@ -87,6 +88,7 @@ if average_results_again
                         end
                         n_iterations_list(RUN, SEP_index, method_index, n_data_index) = length(cost);
                         time_list(RUN, SEP_index, method_index, n_data_index) = time(end);
+                        time_average_list(RUN, SEP_index, method_index, n_data_index) = mean(time);
                     end
                 end
             end
@@ -103,6 +105,8 @@ if average_results_again
     n_itr_std_along_runs = std(n_iterations_list, 1); z = size(n_itr_std_along_runs); n_itr_std_along_runs = reshape(n_itr_std_along_runs, [z(2:end) 1]);
     time_mean_along_runs = mean(time_list, 1); z = size(time_mean_along_runs); time_mean_along_runs = reshape(time_mean_along_runs, [z(2:end) 1]);
     time_std_along_runs = std(time_list, 1); z = size(time_std_along_runs); time_std_along_runs = reshape(time_std_along_runs, [z(2:end) 1]);
+    time_average_mean_along_runs = mean(time_average_list, 1); z = size(time_average_mean_along_runs); time_average_mean_along_runs = reshape(time_average_mean_along_runs, [z(2:end) 1]);
+    time_average_std_along_runs = std(time_average_list, 1); z = size(time_average_std_along_runs); time_average_std_along_runs = reshape(time_average_std_along_runs, [z(2:end) 1]);
     %--> save results in table format in text file:
     for SEP_index = 1:length(SEPS)
         for method_index = 1:length(methods)
@@ -115,7 +119,9 @@ if average_results_again
                 n_itr_std = n_itr_std_along_runs(SEP_index, method_index, n_data_index);
                 time_mean = time_mean_along_runs(SEP_index, method_index, n_data_index);
                 time_std = time_std_along_runs(SEP_index, method_index, n_data_index);
-                fprintf(fid, '%s \t %s \t %d \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \n', SEPS{SEP_index}, methods{method_index}, N_list{n_data_index}, mean_cost(1), std_cost(1), mean_cost(2), std_cost(2), mean_cost(3), std_cost(3), n_itr_mean, n_itr_std, time_mean, time_std);
+                time_average_mean = time_average_mean_along_runs(SEP_index, method_index, n_data_index);
+                time_average_std = time_average_std_along_runs(SEP_index, method_index, n_data_index);
+                fprintf(fid, '%s \t %s \t %d \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \n', SEPS{SEP_index}, methods{method_index}, N_list{n_data_index}, mean_cost(1), std_cost(1), mean_cost(2), std_cost(2), mean_cost(3), std_cost(3), n_itr_mean, n_itr_std, time_mean, time_std, time_average_mean, time_average_std);
             end
         end
     end
