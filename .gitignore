@@ -26,6 +26,6 @@ Contents.m
 # output/saved files
 saved_files/
 
-examples/*.mat
+examples/Karcher_mean/*.mat
 
 lightspeed-master/
