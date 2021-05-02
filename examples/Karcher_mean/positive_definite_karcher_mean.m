@@ -30,8 +30,8 @@ function problem = positive_definite_karcher_mean(A, dimenion_of_matrix, manifol
 % 
 
     % Generate some random data to test the function if none is given.
-    filename =pwd+"/examples/";
-    filename = filename +  dimenion_of_matrix + '.mat';
+    filename = pwd + "/examples/Karcher_mean/";
+    filename = filename + dimenion_of_matrix + '.mat';
     if (~exist('A', 'var') || isempty(A)) && (exist(filename, 'file') == 2)
             load(filename,'A');
      % File exists.

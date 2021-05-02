@@ -10,11 +10,11 @@ install;
 %% general settings:
 global retraction_type; retraction_type = "expm"; %--> expm , taylor
 experiment = "Karcher_mean";  %%--> Karcher_mean, RiemMix
-number_of_runs = 1;
+number_of_runs = 2;
 dimenion_of_matrix = 100;   %%--> 2, 100, 1000, 10000
 
 %% settings for Karcher mean:
-solver_type = "RLBFGS_Wolfe_VTFree";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
+solver_type = "RLBFGS_cautious";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
 start_with_given_initial_point = true;
 
 %% settings for RiemMix:
@@ -119,7 +119,11 @@ for run_index = 1:number_of_runs
     %%%%%%%% saving the workspace:
     save(path_save+"workspace.mat");
 end
-save(pwd+"/saved_files/"+experiment+"/all_info.mat","all_info");
+if experiment == "Karcher_mean"
+    save(pwd+"/saved_files/"+experiment+"/dim="+dimenion_of_matrix+"/all_info_"+solver_type_+".mat","all_info");
+elseif experiment == "RiemMix"
+    save(pwd+"/saved_files/"+experiment+"/all_info.mat","all_info");
+end
 
 
 

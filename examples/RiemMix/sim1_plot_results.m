@@ -1,4 +1,4 @@
-function infos = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT)
+function infos = sim1_plot_results(DIM, SEP, INIT, K, N, E, RESFOLDER, PLOTFOLDER, SELECT, legend_of_methods)
 
 
 if nargin < 5
@@ -132,7 +132,8 @@ if PLOT_ALL_DIFF
         pp_options.ylabel = 'Averaged Cost Difference';
         pp_options.legendLoc = 'NorthEast';
     end
-    pngfile = sprintf('%s/sim1_diff_dim(%d)_K(%d)_sep(%s)_init(%s)_%s.png', PLOTFOLDER, DIM, K, SEP, INIT, PLOTNAME);
+    % pngfile = sprintf('%s/sim1_diff_dim(%d)_K(%d)_sep(%s)_init(%s)_%s.png', PLOTFOLDER, DIM, K, SEP, INIT, PLOTNAME);
+    pngfile = sprintf('%s/sim1_results_dim(%d)_K(%d)_N(%d)_E(%d)_sep(%s)_init(%s)_%s.png', PLOTFOLDER, DIM, K, N, E, SEP, INIT, PLOTNAME);  %--> Benyamin added a more complete name so plots do not overwrite each other
     LOG_SCALE = 2;
     pp_options.ylimits = [10^-5 inf];
 else
@@ -152,6 +153,11 @@ else
 end
 
 pp_options.logScale = LOG_SCALE;
+
+%%%% user-defined legend added by Benyamin:
+if nargin == 10
+    pp_options.legend = legend_of_methods;
+end
 
 figure('Name', pngfile, 'visible', 'off')
 prettyPlot(xData, yData, pp_options);
