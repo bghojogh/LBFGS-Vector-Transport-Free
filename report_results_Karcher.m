@@ -40,7 +40,7 @@ for method_index = 1:length(methods)
                 costs_list(run_index, method_index, itr_of_cost_index) = cost(itr_);
             end
             n_iterations_list(run_index, method_index) = length(cost);
-            time_list(run_index, method_index) = time(end);
+            time_list(run_index, method_index) = sum(time);
             time_average_list(run_index, method_index) = mean(time);
         end
     end 

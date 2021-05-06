@@ -15,7 +15,8 @@ load(path);  %--> load all_info.mat
 %% plot results
 %%%%%%% Note: You can set some of the methods "false" in the function get_methods.m (in path ./examples/RiemMax/) to exclude some of the methods in plots
 if plot_again
-    legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS (Wolfe)', 'RLBFGS (Cautious)'};
+    %legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS (Wolfe)', 'RLBFGS (Cautious)'};
+    legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS', 'RLBFGS (Cautious)'};
     for experiment_index = 1:length(all_info)
         info_ = all_info(experiment_index);
         DIM = info_.dim;
@@ -28,7 +29,7 @@ if plot_again
         RESFOLDER = info_.result_folder;
         %PLOTFOLDER = info_.plot_folder;
         tmp = info_.plot_folder.split("plots");
-        PLOTFOLDER = tmp(1) + "plots_final";  %--> tmp(1) + "plots_final"; or tmp(1) + "plots_final2"; or ... --> can rename not to overwrite previous plots
+        PLOTFOLDER = tmp(1) + "plots_final2";  %--> tmp(1) + "plots_final"; or tmp(1) + "plots_final2"; or ... --> can rename not to overwrite previous plots
         if ~exist(PLOTFOLDER, 'dir')
            mkdir(PLOTFOLDER)
         end
@@ -39,9 +40,9 @@ end
 %% average results
 SEPS = {'low','mid','high'}; % Separation
 methods = {'LBFGS1', 'LBFGS2', 'LBFGS3', 'LBFGS4'};
-N_list = {400};  %--> {40, 400};
+N_list = {10000};  %--> {40, 400}; --> 100, 10000
 n_runs = 10;
-iterations_to_report = {10, 20, "last"};  %--> {10, 20, "last"}, {20, 50, "last"}
+iterations_to_report = {30, 50, "last"};  %--> {10, 20, "last"}, {20, 50, "last"}, {30, 50, "last"}
 if average_results_again
     costs_list = zeros(n_runs, length(SEPS), length(methods), length(N_list), length(iterations_to_report));
     n_iterations_list = zeros(n_runs, length(SEPS), length(methods), length(N_list));
@@ -88,7 +89,7 @@ if average_results_again
                             end
                         end
                         n_iterations_list(RUN, SEP_index, method_index, n_data_index) = length(cost);
-                        time_list(RUN, SEP_index, method_index, n_data_index) = time(end);
+                        time_list(RUN, SEP_index, method_index, n_data_index) = sum(time);
                         time_average_list(RUN, SEP_index, method_index, n_data_index) = mean(time);
                     end
                 end

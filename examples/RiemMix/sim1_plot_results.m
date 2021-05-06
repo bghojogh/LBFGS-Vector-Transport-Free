@@ -129,7 +129,8 @@ if PLOT_ALL_DIFF
         for imethod = 1:numel(methods)
             yData{imethod} = ma - yData{imethod};
         end
-        pp_options.ylabel = 'Averaged Cost Difference';
+        %pp_options.ylabel = 'Averaged Cost Difference';
+        pp_options.ylabel = 'Cost Difference';
         pp_options.legendLoc = 'NorthEast';
     end
     % pngfile = sprintf('%s/sim1_diff_dim(%d)_K(%d)_sep(%s)_init(%s)_%s.png', PLOTFOLDER, DIM, K, SEP, INIT, PLOTNAME);
