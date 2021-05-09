@@ -1,0 +1,4 @@
+This code may need installation of "lightspeed" toolbox in some computers. Try the code without this toolbox and if you get error, install this toolbox to be able to run the code.
+You can find this toolbox in:
+https://codeload.github.com/tminka/lightspeed/zip/refs/heads/master
+https://github.com/tminka/lightspeed

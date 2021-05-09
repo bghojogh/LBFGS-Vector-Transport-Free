@@ -3,6 +3,10 @@ clc
 clear all
 close all
 
+%% installing for adding paths:
+addpath(genpath(fullfile("./", 'utils')))
+install;
+
 %% Settings:
 experiment = "Karcher_mean";  %%--> Karcher_mean, RiemMix --> it should be Karcher_mean in this file
 retraction_type = "expm"; %--> expm , taylor

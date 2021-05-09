@@ -3,6 +3,10 @@ clc
 clear all
 close all
 
+%% installing for adding paths:
+addpath(genpath(fullfile("./", 'utils')))
+install;
+
 %% Settings:
 experiment = "RiemMix";  %%--> Karcher_mean, RiemMix --> it should be RiemMix in this file
 plot_again = true;
@@ -40,7 +44,7 @@ end
 %% average results
 SEPS = {'low','mid','high'}; % Separation
 methods = {'LBFGS1', 'LBFGS2', 'LBFGS3', 'LBFGS4'};
-N_list = {10000};  %--> {40, 400}; --> 100, 10000
+N_list = {40};  %--> {40, 400}; --> 100, 1000, 10000, 1000000 ---> it depends on the dimensionality of data --> it is 100*(dim^2)
 n_runs = 10;
 iterations_to_report = {30, 50, "last"};  %--> {10, 20, "last"}, {20, 50, "last"}, {30, 50, "last"}
 if average_results_again
