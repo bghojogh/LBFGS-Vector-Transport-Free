@@ -9,7 +9,7 @@ install;
 
 %% Settings:
 experiment = "RiemMix";  %%--> Karcher_mean, RiemMix --> it should be RiemMix in this file
-plot_again = true;
+plot_again = false;
 average_results_again = true;
 
 %% load results
@@ -105,28 +105,20 @@ if average_results_again
     fid = fopen(path_(1)+'/results.txt', 'wt');
     fprintf(fid, 'SEP \t Method \t N \t itr=%d \t itr=%d \t itr=last \t n_iters \t time \t average time \n', iterations_to_report{1}, iterations_to_report{2});
     fprintf(fid, '=============================================== \n');
-    cost_mean_along_runs = mean(costs_list, 1); z = size(cost_mean_along_runs); cost_mean_along_runs = reshape(cost_mean_along_runs, [z(2:end) 1]);
-    cost_std_along_runs = std(costs_list, 1); z = size(cost_std_along_runs); cost_std_along_runs = reshape(cost_std_along_runs, [z(2:end) 1]);
-    n_itr_mean_along_runs = mean(n_iterations_list, 1); z = size(n_itr_mean_along_runs); n_itr_mean_along_runs = reshape(n_itr_mean_along_runs, [z(2:end) 1]);
-    n_itr_std_along_runs = std(n_iterations_list, 1); z = size(n_itr_std_along_runs); n_itr_std_along_runs = reshape(n_itr_std_along_runs, [z(2:end) 1]);
-    time_mean_along_runs = mean(time_list, 1); z = size(time_mean_along_runs); time_mean_along_runs = reshape(time_mean_along_runs, [z(2:end) 1]);
-    time_std_along_runs = std(time_list, 1); z = size(time_std_along_runs); time_std_along_runs = reshape(time_std_along_runs, [z(2:end) 1]);
-    time_average_mean_along_runs = mean(time_average_list, 1); z = size(time_average_mean_along_runs); time_average_mean_along_runs = reshape(time_average_mean_along_runs, [z(2:end) 1]);
-    time_average_std_along_runs = std(time_average_list, 1); z = size(time_average_std_along_runs); time_average_std_along_runs = reshape(time_average_std_along_runs, [z(2:end) 1]);
     %--> save results in table format in text file:
     for SEP_index = 1:length(SEPS)
         for method_index = 1:length(methods)
             for n_data_index = 1:length(N_list)
                 for itr_of_cost_index = 1:length(iterations_to_report)
-                    mean_cost(itr_of_cost_index) = cost_mean_along_runs(SEP_index, method_index, n_data_index, itr_of_cost_index);
-                    std_cost(itr_of_cost_index) = cost_std_along_runs(SEP_index, method_index, n_data_index, itr_of_cost_index);
+                    mean_cost(itr_of_cost_index) = mean(costs_list(:, SEP_index, method_index, n_data_index, itr_of_cost_index));
+                    std_cost(itr_of_cost_index) = std(costs_list(:, SEP_index, method_index, n_data_index, itr_of_cost_index));
                 end
-                n_itr_mean = n_itr_mean_along_runs(SEP_index, method_index, n_data_index);
-                n_itr_std = n_itr_std_along_runs(SEP_index, method_index, n_data_index);
-                time_mean = time_mean_along_runs(SEP_index, method_index, n_data_index);
-                time_std = time_std_along_runs(SEP_index, method_index, n_data_index);
-                time_average_mean = time_average_mean_along_runs(SEP_index, method_index, n_data_index);
-                time_average_std = time_average_std_along_runs(SEP_index, method_index, n_data_index);
+                n_itr_mean = mean(n_iterations_list(:, SEP_index, method_index, n_data_index));
+                n_itr_std = std(n_iterations_list(:, SEP_index, method_index, n_data_index));
+                time_mean = mean(time_list(:, SEP_index, method_index, n_data_index));
+                time_std = std(time_list(:, SEP_index, method_index, n_data_index));
+                time_average_mean = mean(time_average_list(:, SEP_index, method_index, n_data_index));
+                time_average_std = std(time_average_list(:, SEP_index, method_index, n_data_index));
                 fprintf(fid, '%s \t %s \t %d \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \n', SEPS{SEP_index}, methods{method_index}, N_list{n_data_index}, mean_cost(1), std_cost(1), mean_cost(2), std_cost(2), mean_cost(3), std_cost(3), n_itr_mean, n_itr_std, time_mean, time_std, time_average_mean, time_average_std);
             end
         end
