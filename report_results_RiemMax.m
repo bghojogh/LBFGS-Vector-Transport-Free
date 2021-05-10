@@ -9,7 +9,7 @@ install;
 
 %% Settings:
 experiment = "RiemMix";  %%--> Karcher_mean, RiemMix --> it should be RiemMix in this file
-plot_again = false;
+plot_again = true;
 average_results_again = true;
 
 %% load results
