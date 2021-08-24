@@ -2,3 +2,4 @@ This code may need installation of "lightspeed" toolbox in some computers. Try t
 You can find this toolbox in:
 https://codeload.github.com/tminka/lightspeed/zip/refs/heads/master
 https://github.com/tminka/lightspeed
+We have put that package, in folder "lightspeed-master", in the root folder of this repository. One should run the "install_lightspeed.m" in that folder to install the "lightspeed" toolbox.

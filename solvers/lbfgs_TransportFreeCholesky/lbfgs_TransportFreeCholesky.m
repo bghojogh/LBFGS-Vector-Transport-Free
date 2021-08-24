@@ -37,10 +37,15 @@ function [x cost info costevals] = lbfgs_TransportFree(problem, x, options)
 %
 
 % VTFreeCholesky_flag = true;
-if isfield(problem.M, 'map_the_vector')
-    VTFreeCholesky_flag = true;
+% if isfield(problem.M, 'map_the_vector')
+%     VTFreeCholesky_flag = true;
+% else
+%     VTFreeCholesky_flag = false;
+% end
+if ~isfield(problem, 'costgrad')
+    VTFreeCholesky_flag = true;  %--> it means Riemannian gradient is given directly by the user (problem) and not computed from Euclidean gradient. So, we do not implicitly map the Riemannian gradient in egrad2rgrad operator of manifold_VTF and should map it explicitly in the algorithm.
 else
-    VTFreeCholesky_flag = false;
+    VTFreeCholesky_flag = false;  %--> it means Riemannian gradient is not given directly by the user (problem) and is computed from Euclidean gradient. So, we do implicitly map the Riemannian gradient in egrad2rgrad operator of manifold_VTF and should not map it explicitly in the algorithm.
 end
 
 % Verify that the problem description is sufficient for the solver.

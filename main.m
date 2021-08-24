@@ -46,11 +46,11 @@ elseif solver_type == "RLBFGS_Wolfe_VTFreeCholesky"
 end
 
 %% optimization runs:
-base_dir = "./saved_files/" + experiment + "/dim=" + dimenion_of_matrix + "/";
+base_dir = "./saved_files/" + experiment + "/";
 info_ind = 1;
 for run_index = 1:number_of_runs
     if experiment == "Karcher_mean"
-        path_of_initial_point = base_dir + "run" + (run_index) + "/"; 
+        path_of_initial_point = base_dir + "dim=" + dimenion_of_matrix + "/run" + (run_index) + "/"; 
         if solver_type == "RLBFGS_Wolfe_VTFree" || solver_type == "RLBFGS_Wolfe_VTFreeCholesky" || solver_type == "RLBFGS_Wolfe"
             solver_type_ = solver_type + "_" + retraction_type;
         else
@@ -101,7 +101,10 @@ for run_index = 1:number_of_runs
         record_command_window(path_save, "off")
         all_info(run_index) = {info_};
     elseif experiment == "RiemMix"
-        path_save = sprintf("saved_files/RiemMix/dim=%d/run%d/", dimenion_of_matrix, run_index);
+        path_save = sprintf("%sdim=%d/run%d/", base_dir, dimenion_of_matrix, run_index);
+        if ~exist(path_save, 'dir')
+            mkdir(path_save);
+        end
         record_command_window(path_save+"plots2/", "on")
         info_list = sim1(1, DIMS, SEPS, KS, NDIM, ES, INITS, SELECT, path_save);
         for i = info_ind:size(info_list,2)+info_ind-1  %length(fieldnames(info_list))-1
