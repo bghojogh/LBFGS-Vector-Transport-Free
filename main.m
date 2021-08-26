@@ -10,7 +10,7 @@ install;
 %% general settings:
 global retraction_type; retraction_type = "expm"; %--> expm , taylor
 experiment = "RiemMix";  %%--> Karcher_mean, RiemMix
-number_of_runs = 10;
+number_of_runs = 1;
 if experiment == "Karcher_mean"
     dimenion_of_matrix = 100;   %%--> for RiemMix: 2 / for Karcher_mean: 100
 elseif experiment == "RiemMix"

@@ -20,7 +20,8 @@ load(path);  %--> load all_info.mat
 %%%%%%% Note: You can set some of the methods "false" in the function get_methods.m (in path ./examples/RiemMax/) to exclude some of the methods in plots
 if plot_again
     %legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS (Wolfe)', 'RLBFGS (Cautious)'};
-    legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS', 'RLBFGS (Cautious)'};
+%     legend_of_methods = {'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS', 'RLBFGS (Cautious)'};
+    legend_of_methods = {'SGD', 'EM', 'VTF-RLBFGS (ISR)', 'VTF-RLBFGS (Cholesky)', 'RLBFGS', 'CG'};  %---> the order of names of methods should be the same as the order of methods in all_info(1).info_list.method, which is the order of methods in get_methods.m
     for experiment_index = 1:length(all_info)
         info_ = all_info(experiment_index);
         DIM = info_.dim;
@@ -43,10 +44,11 @@ end
 
 %% average results
 SEPS = {'low','mid','high'}; % Separation
-methods = {'LBFGS1', 'LBFGS2', 'LBFGS3', 'LBFGS4'};
-N_list = {40};  %--> {40, 400}; --> 100, 1000, 10000, 1000000 ---> it depends on the dimensionality of data --> it is 100*(dim^2)
-n_runs = 10;
-iterations_to_report = {30, 50, "last"};  %--> {10, 20, "last"}, {20, 50, "last"}, {30, 50, "last"}
+% methods = {'LBFGS1', 'LBFGS2', 'LBFGS3', 'LBFGS4'};
+methods = {'SGDf11', 'EM1', 'LBFGS1', 'LBFGS2', 'LBFGS3', 'LBFGS4', 'CG1'};  %---> the names of methods should be the same as the methods in all_info(1).info_list.method (which is in the order of methods in get_methods.m)
+N_list = {400};  %--> {40, 400}; --> 100, 1000, 10000, 1000000 ---> it depends on the dimensionality of data --> it is 100*(dim^2)
+n_runs = 1;
+iterations_to_report = {"last"};  %--> {10, 20, "last"}, {20, 50, "last"}, {30, 50, "last"}, {"last"}--> if using this, we should the headers and computations of times in fprintf and below code
 if average_results_again
     costs_list = zeros(n_runs, length(SEPS), length(methods), length(N_list), length(iterations_to_report));
     n_iterations_list = zeros(n_runs, length(SEPS), length(methods), length(N_list));
@@ -103,12 +105,14 @@ if average_results_again
     %--> take mean and std:
     path_ = RESFOLDER.split("run");
     fid = fopen(path_(1)+'/results.txt', 'wt');
-    fprintf(fid, 'SEP \t Method \t N \t itr=%d \t itr=%d \t itr=last \t n_iters \t time \t average time \n', iterations_to_report{1}, iterations_to_report{2});
+%     fprintf(fid, 'N \t SEP \t Method \t itr=%d \t itr=%d \t itr=last \t n_iters \t time \t average time \n', iterations_to_report{1}, iterations_to_report{2});
+%     fprintf(fid, 'N \t SEP \t Method \t itr=last \t n_iters \t time \t average time \n');
+    fprintf(fid, 'N \t SEP \t Method \t n_iters \t time \t average time(per itr) \t cost(itr=last) \n');
     fprintf(fid, '=============================================== \n');
     %--> save results in table format in text file:
-    for SEP_index = 1:length(SEPS)
-        for method_index = 1:length(methods)
-            for n_data_index = 1:length(N_list)
+    for n_data_index = 1:length(N_list)
+        for SEP_index = 1:length(SEPS)
+            for method_index = 1:length(methods)
                 for itr_of_cost_index = 1:length(iterations_to_report)
                     mean_cost(itr_of_cost_index) = mean(costs_list(:, SEP_index, method_index, n_data_index, itr_of_cost_index));
                     std_cost(itr_of_cost_index) = std(costs_list(:, SEP_index, method_index, n_data_index, itr_of_cost_index));
@@ -119,7 +123,37 @@ if average_results_again
                 time_std = std(time_list(:, SEP_index, method_index, n_data_index));
                 time_average_mean = mean(time_average_list(:, SEP_index, method_index, n_data_index));
                 time_average_std = std(time_average_list(:, SEP_index, method_index, n_data_index));
-                fprintf(fid, '%s \t %s \t %d \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \n', SEPS{SEP_index}, methods{method_index}, N_list{n_data_index}, mean_cost(1), std_cost(1), mean_cost(2), std_cost(2), mean_cost(3), std_cost(3), n_itr_mean, n_itr_std, time_mean, time_std, time_average_mean, time_average_std);
+%                 fprintf(fid, '%d \t %s \t %s \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \n', N_list{n_data_index}, SEPS{SEP_index}, methods{method_index}, mean_cost(1), std_cost(1), mean_cost(2), std_cost(2), mean_cost(3), std_cost(3), n_itr_mean, n_itr_std, time_mean, time_std, time_average_mean, time_average_std);
+                fprintf(fid, '%d \t %s \t %s \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \t %.3f|+|%.3f \n', N_list{n_data_index}, SEPS{SEP_index}, methods{method_index}, n_itr_mean, n_itr_std, time_mean, time_std, time_average_mean, time_average_std, mean_cost(1), std_cost(1));
+            end
+        end
+    end
+    fclose(fid);
+    %%%%%%%%%%%%%%%%%%%%% table for time difference:
+    path_ = RESFOLDER.split("run");
+    fid = fopen(path_(1)+'/results_timeDiff.txt', 'wt');
+    fprintf(fid, 'N \t SEP \t Method \t %s \t %s \t %s \t %s \n', methods{1}, methods{2}, methods{5}, methods{7});  %---> method indices are based on the methods above (in line 48)
+    fprintf(fid, '=============================================== \n');
+    %--> save results in table format in text file:
+    for n_data_index = 1:length(N_list)
+        for SEP_index = 1:length(SEPS)
+            for method_index1 = 1:length(methods)
+                if ~strcmp(methods{method_index1}, 'LBFGS1') && ~strcmp(methods{method_index1}, 'LBFGS2')
+                    continue
+                end
+                fprintf(fid, '%d \t %s \t %s', N_list{n_data_index}, SEPS{SEP_index}, methods{method_index1});
+                for method_index2 = 1:length(methods)
+                    if strcmp(methods{method_index2}, 'LBFGS1') || strcmp(methods{method_index2}, 'LBFGS2')
+                        continue
+                    end
+                    if strcmp(methods{method_index2}, 'LBFGS4') %---> ignore cautious LBFGS
+                        continue
+                    end
+                    time_diff_mean = mean(time_list(:, SEP_index, method_index1, n_data_index) - time_list(:, SEP_index, method_index2, n_data_index));
+                    time_diff_std = std(time_list(:, SEP_index, method_index1, n_data_index) - time_list(:, SEP_index, method_index2, n_data_index));
+                    fprintf(fid, '\t %.3f|+|%.3f', time_diff_mean, time_diff_std);
+                end
+                fprintf(fid, '\n');
             end
         end
     end

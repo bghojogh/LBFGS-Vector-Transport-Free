@@ -8,7 +8,7 @@ end
 if K > 1
     
     it = 50;
-    if false
+    if true
         METHODS.SGDf11.legend = 'SGD (it=50)';
         METHODS.SGDf11.info_fields = struct('iter',[],'gradnorm',[],'cost',[],'time',[],'theta',[],'ll',[]);
         METHODS.SGDf11.ComponentD = mvn2factorytmp(DIM);
@@ -53,7 +53,7 @@ if K > 1
     end
     
     
-    if false
+    if true
         METHODS.EM1.legend = 'EM, Usual MVN';
         METHODS.EM1.info_fields = struct('iter',[],'cost',[],'time',[],'theta',[],'ll',[]);
         METHODS.EM1.ComponentD = mvnfactory(DIM);
@@ -98,7 +98,7 @@ if K > 1
         METHODS.LBFGS3.options.penalize=false;
     end
     
-    if true
+    if false
         METHODS.LBFGS4.legend = 'Cautious RLBFGS';
         METHODS.LBFGS4.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
 %         METHODS.LBFGS4.ComponentD = mvnfactory_manopt(DIM);
@@ -139,7 +139,7 @@ if K > 1
         METHODS.CG2.options.solver = 'cg';
     end
     
-    if false
+    if true
         METHODS.CG1.legend = 'CG, Usual MVN';
         METHODS.CG1.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'beta',[],'theta',[],'ll',[]);
         METHODS.CG1.ComponentD = mvnfactory(DIM);
