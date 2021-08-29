@@ -72,30 +72,63 @@ if K > 1
     end
     
     if true
-        METHODS.LBFGS1.legend = 'VTF-RLBFGS';
-        METHODS.LBFGS1.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS1.ComponentD = mvnfactory_VTFree(DIM);
-        METHODS.LBFGS1.options.solver = 'lbfgs_TransportFree';
+        METHODS.LBFGS_VTF_EXP.legend = 'VTF-RLBFGS-EXP';
+        METHODS.LBFGS_VTF_EXP.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS_VTF_EXP.ComponentD = mvnfactory_VTFree(DIM);
+        METHODS.LBFGS_VTF_EXP.options.solver = 'lbfgs_TransportFree';
         % added by Reza
-        METHODS.LBFGS1.options.penalize=false;
+        METHODS.LBFGS_VTF_EXP.options.penalize=false;
+        %--> In sim1_run function, we have set the "retraction_type" variable
     end
     
     if true
-        METHODS.LBFGS2.legend = 'VTF-Cholesky-RLBFGS';
-        METHODS.LBFGS2.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS2.ComponentD = mvnfactory_VTFreeCholesky(DIM);
-        METHODS.LBFGS2.options.solver = 'lbfgs_TransportFreeCholesky';
+        METHODS.LBFGS_VTF_TAYLOR.legend = 'VTF-RLBFGS-TAYLOR';
+        METHODS.LBFGS_VTF_TAYLOR.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS_VTF_TAYLOR.ComponentD = mvnfactory_VTFree(DIM);
+        METHODS.LBFGS_VTF_TAYLOR.options.solver = 'lbfgs_TransportFree';
         % added by Reza
-        METHODS.LBFGS2.options.penalize=false;
+        METHODS.LBFGS_VTF_TAYLOR.options.penalize=false;
+        %--> In sim1_run function, we have set the "retraction_type" variable
     end
     
     if true
-        METHODS.LBFGS3.legend = 'RLBFGS';
-        METHODS.LBFGS3.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS3.ComponentD = mvnfactory(DIM);
-        METHODS.LBFGS3.options.solver = 'lbfgs_MIXEST';
+        METHODS.LBFGS_VTF_Cholesky_EXP.legend = 'VTF-Cholesky-RLBFGS-EXP';
+        METHODS.LBFGS_VTF_Cholesky_EXP.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS_VTF_Cholesky_EXP.ComponentD = mvnfactory_VTFreeCholesky(DIM);
+        METHODS.LBFGS_VTF_Cholesky_EXP.options.solver = 'lbfgs_TransportFreeCholesky';
         % added by Reza
-        METHODS.LBFGS3.options.penalize=false;
+        METHODS.LBFGS_VTF_Cholesky_EXP.options.penalize=false;
+        %--> In sim1_run function, we have set the "retraction_type" variable
+    end
+    
+    if true
+        METHODS.LBFGS_VTF_Cholesky_TAYLOR.legend = 'VTF-Cholesky-RLBFGS-TAYLOR';
+        METHODS.LBFGS_VTF_Cholesky_TAYLOR.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS_VTF_Cholesky_TAYLOR.ComponentD = mvnfactory_VTFreeCholesky(DIM);
+        METHODS.LBFGS_VTF_Cholesky_TAYLOR.options.solver = 'lbfgs_TransportFreeCholesky';
+        % added by Reza
+        METHODS.LBFGS_VTF_Cholesky_TAYLOR.options.penalize=false;
+        %--> In sim1_run function, we have set the "retraction_type" variable
+    end
+    
+    if true
+        METHODS.LBFGS_EXP.legend = 'RLBFGS-EXP';
+        METHODS.LBFGS_EXP.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS_EXP.ComponentD = mvnfactory(DIM);  %--> in function "mvnfactory", we changed "spdfactory" to "spdfactory_withOptionExpTaylor"
+        METHODS.LBFGS_EXP.options.solver = 'lbfgs_MIXEST';
+        % added by Reza
+        METHODS.LBFGS_EXP.options.penalize=false;
+        %--> In sim1_run function, we have set the "retraction_type" variable
+    end
+    
+    if true
+        METHODS.LBFGS_TAYLOR.legend = 'RLBFGS-TAYLOR';
+        METHODS.LBFGS_TAYLOR.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS_TAYLOR.ComponentD = mvnfactory(DIM);  %--> in function "mvnfactory", we changed "spdfactory" to "spdfactory_withOptionExpTaylor"
+        METHODS.LBFGS_TAYLOR.options.solver = 'lbfgs_MIXEST';
+        % added by Reza
+        METHODS.LBFGS_TAYLOR.options.penalize=false;
+        %--> In sim1_run function, we have set the "retraction_type" variable
     end
     
     if false

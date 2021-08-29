@@ -66,9 +66,18 @@ else
     load(init_filename, 'Theta0s');
 end
 
+%----> added for retraction type in VTF-RLBFGS and VTF-Cholesky-RLBFGS:
+global retraction_type; %--> expm , taylor
+
 methods = fieldnames(METHODS);
 for imethod = 1:numel(methods)
     method = methods{imethod};
+    
+    if strcmp(method, 'LBFGS_VTF_EXP') || strcmp(method, 'LBFGS_VTF_Cholesky_EXP') || strcmp(method, 'LBFGS_EXP')
+        retraction_type = "expm";
+    elseif strcmp(method, 'LBFGS_VTF_TAYLOR') || strcmp(method, 'LBFGS_VTF_Cholesky_TAYLOR') || strcmp(method, 'LBFGS_TAYLOR')
+        retraction_type = "taylor";
+    end
     
     filename = sprintf('%s/sim1_results_%s_dim(%d)_K(%d)_N(%d)_E(%d)_sep(%s)_init(%s)', RESFOLDER, method, DIM, K, N, e, SEP, INIT);
     if exist([filename '.mat'], 'file')
