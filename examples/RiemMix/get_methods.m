@@ -4,11 +4,11 @@ function METHODS = get_methods(DIM, K, NDATA)
 if nargin < 3
     NDATA = DIM^2*100;
 end
-
+do_regularize = false;
 if K > 1
     
     it = 50;
-    if true
+    if false
         METHODS.SGDf11.legend = 'SGD (it=50)';
         METHODS.SGDf11.info_fields = struct('iter',[],'gradnorm',[],'cost',[],'time',[],'theta',[],'ll',[]);
         METHODS.SGDf11.ComponentD = mvn2factorytmp(DIM);
@@ -19,11 +19,11 @@ if K > 1
         METHODS.SGDf11.options.sgd.base = 10^(-3/METHODS.SGDf11.options.sgd.batchnum/it);
         METHODS.SGDf11.options.sgd.momentum = 0;
         METHODS.SGDf11.options.sgd.svrg = false;
-        METHODS.SGDf11.options.penalize = true;
+        METHODS.SGDf11.options.penalize = do_regularize;
     end
     
     it = 20;
-    if false
+    if  false
         METHODS.SGDf9.legend = 'SGD (it=20)';
         METHODS.SGDf9.info_fields = struct('iter',[],'gradnorm',[],'cost',[],'time',[],'theta',[],'ll',[]);
         METHODS.SGDf9.ComponentD = mvn2factorytmp(DIM);
@@ -34,11 +34,11 @@ if K > 1
         METHODS.SGDf9.options.sgd.base = 10^(-3/METHODS.SGDf9.options.sgd.batchnum/it);
         METHODS.SGDf9.options.sgd.momentum = 0;
         METHODS.SGDf9.options.sgd.svrg = false;
-        METHODS.SGDf9.options.penalize = true;
+        METHODS.SGDf9.options.penalize = do_regularize;
     end
     
     it = 5;
-    if false
+    if false %
         METHODS.SGDf12.legend = 'SGD (it=5)'; %m=5d,
         METHODS.SGDf12.info_fields = struct('iter',[],'gradnorm',[],'cost',[],'time',[],'theta',[],'ll',[]);
         METHODS.SGDf12.ComponentD = mvn2factorytmp(DIM);
@@ -49,7 +49,7 @@ if K > 1
         METHODS.SGDf12.options.sgd.base = 10^(-3/METHODS.SGDf12.options.sgd.batchnum/it);
         METHODS.SGDf12.options.sgd.momentum = 0;
         METHODS.SGDf12.options.sgd.svrg = false;
-        METHODS.SGDf12.options.penalize = true;
+        METHODS.SGDf12.options.penalize = do_regularize;
     end
     
     
@@ -58,7 +58,7 @@ if K > 1
         METHODS.EM1.info_fields = struct('iter',[],'cost',[],'time',[],'theta',[],'ll',[]);
         METHODS.EM1.ComponentD = mvnfactory(DIM);
         METHODS.EM1.options.solver = 'default';
-        METHODS.EM1.options.penalize = true;
+        METHODS.EM1.options.penalize = do_regularize;
     end
     
     % Reparametrized EM and LBFGs are a bit slow
@@ -68,67 +68,34 @@ if K > 1
         METHODS.EM2.ComponentD = mvn2factory(DIM);
         METHODS.EM2.options.solver = 'default';
         % added by Reza
-        METHODS.EM2.options.penalize=false;
+        METHODS.EM2.options.penalize=do_regularize;
     end
     
     if true
-        METHODS.LBFGS_VTF_EXP.legend = 'VTF-RLBFGS-EXP';
-        METHODS.LBFGS_VTF_EXP.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS_VTF_EXP.ComponentD = mvnfactory_VTFree(DIM);
-        METHODS.LBFGS_VTF_EXP.options.solver = 'lbfgs_TransportFree';
+        METHODS.LBFGS1.legend = 'VTF-RLBFGS';
+        METHODS.LBFGS1.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS1.ComponentD = mvnfactory_VTFree(DIM);
+        METHODS.LBFGS1.options.solver = 'lbfgs_TransportFree';
         % added by Reza
-        METHODS.LBFGS_VTF_EXP.options.penalize=false;
-        %--> In sim1_run function, we have set the "retraction_type" variable
+        METHODS.LBFGS1.options.penalize=do_regularize;
     end
     
     if true
-        METHODS.LBFGS_VTF_TAYLOR.legend = 'VTF-RLBFGS-TAYLOR';
-        METHODS.LBFGS_VTF_TAYLOR.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS_VTF_TAYLOR.ComponentD = mvnfactory_VTFree(DIM);
-        METHODS.LBFGS_VTF_TAYLOR.options.solver = 'lbfgs_TransportFree';
+        METHODS.LBFGS2.legend = 'VTF-Cholesky-RLBFGS';
+        METHODS.LBFGS2.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS2.ComponentD = mvnfactory_VTFreeCholesky(DIM);
+        METHODS.LBFGS2.options.solver = 'lbfgs_TransportFreeCholesky';
         % added by Reza
-        METHODS.LBFGS_VTF_TAYLOR.options.penalize=false;
-        %--> In sim1_run function, we have set the "retraction_type" variable
+        METHODS.LBFGS2.options.penalize=do_regularize;
     end
     
     if true
-        METHODS.LBFGS_VTF_Cholesky_EXP.legend = 'VTF-Cholesky-RLBFGS-EXP';
-        METHODS.LBFGS_VTF_Cholesky_EXP.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS_VTF_Cholesky_EXP.ComponentD = mvnfactory_VTFreeCholesky(DIM);
-        METHODS.LBFGS_VTF_Cholesky_EXP.options.solver = 'lbfgs_TransportFreeCholesky';
+        METHODS.LBFGS3.legend = 'RLBFGS';
+        METHODS.LBFGS3.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
+        METHODS.LBFGS3.ComponentD = mvnfactory(DIM);  %--> in function "mvnfactory", we changed "spdfactory" to "spdfactory_withOptionExpTaylor"
+        METHODS.LBFGS3.options.solver = 'lbfgs_MIXEST';
         % added by Reza
-        METHODS.LBFGS_VTF_Cholesky_EXP.options.penalize=false;
-        %--> In sim1_run function, we have set the "retraction_type" variable
-    end
-    
-    if true
-        METHODS.LBFGS_VTF_Cholesky_TAYLOR.legend = 'VTF-Cholesky-RLBFGS-TAYLOR';
-        METHODS.LBFGS_VTF_Cholesky_TAYLOR.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS_VTF_Cholesky_TAYLOR.ComponentD = mvnfactory_VTFreeCholesky(DIM);
-        METHODS.LBFGS_VTF_Cholesky_TAYLOR.options.solver = 'lbfgs_TransportFreeCholesky';
-        % added by Reza
-        METHODS.LBFGS_VTF_Cholesky_TAYLOR.options.penalize=false;
-        %--> In sim1_run function, we have set the "retraction_type" variable
-    end
-    
-    if true
-        METHODS.LBFGS_EXP.legend = 'RLBFGS-EXP';
-        METHODS.LBFGS_EXP.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS_EXP.ComponentD = mvnfactory(DIM);  %--> in function "mvnfactory", we changed "spdfactory" to "spdfactory_withOptionExpTaylor"
-        METHODS.LBFGS_EXP.options.solver = 'lbfgs_MIXEST';
-        % added by Reza
-        METHODS.LBFGS_EXP.options.penalize=false;
-        %--> In sim1_run function, we have set the "retraction_type" variable
-    end
-    
-    if true
-        METHODS.LBFGS_TAYLOR.legend = 'RLBFGS-TAYLOR';
-        METHODS.LBFGS_TAYLOR.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
-        METHODS.LBFGS_TAYLOR.ComponentD = mvnfactory(DIM);  %--> in function "mvnfactory", we changed "spdfactory" to "spdfactory_withOptionExpTaylor"
-        METHODS.LBFGS_TAYLOR.options.solver = 'lbfgs_MIXEST';
-        % added by Reza
-        METHODS.LBFGS_TAYLOR.options.penalize=false;
-        %--> In sim1_run function, we have set the "retraction_type" variable
+        METHODS.LBFGS3.options.penalize=do_regularize;
     end
     
     if false
@@ -138,14 +105,14 @@ if K > 1
         METHODS.LBFGS4.ComponentD = mvnfactory(DIM);
         METHODS.LBFGS4.options.solver = 'lbfgs_MANOPT';
         % added by Reza
-        METHODS.LBFGS4.options.penalize=false;
+        METHODS.LBFGS4.options.penalize=do_regularize;
     end
 
     if false
         METHODS.LBFGS5.legend = 'LBFGS, Reparameterized MVN';
         METHODS.LBFGS5.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'theta',[],'ll',[]);
         METHODS.LBFGS5.ComponentD = mvn2factory(DIM);
-        METHODS.LBFGS5.options.penalize = true;
+        METHODS.LBFGS5.options.penalize = do_regularize;
         METHODS.LBFGS5.options.solver = 'lbfgs';
     end
     
@@ -168,7 +135,7 @@ if K > 1
         METHODS.CG2.legend = 'CG, Reparameterized MVN';
         METHODS.CG2.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'beta',[],'theta',[],'ll',[]);
         METHODS.CG2.ComponentD = mvn2factory(DIM);
-        METHODS.CG2.options.penalize = true;
+        METHODS.CG2.options.penalize = do_regularize;
         METHODS.CG2.options.solver = 'cg';
     end
     
@@ -177,6 +144,8 @@ if K > 1
         METHODS.CG1.info_fields = struct('iter',[],'cost',[],'gradnorm',[],'stepsize',[],'time',[],'linesearch',[],'beta',[],'theta',[],'ll',[]);
         METHODS.CG1.ComponentD = mvnfactory(DIM);
         METHODS.CG1.options.solver = 'cg';
+        %added by Reza
+        METHODS.CG1.options.penalize = do_regularize;
     end
     
     return

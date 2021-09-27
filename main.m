@@ -7,40 +7,42 @@ close all
 addpath(genpath(fullfile("./", 'utils')))
 install;
 
-%% settings:
-% global retraction_type; retraction_type = "expm"; %--> expm , taylor
+%% general settings:
+global retraction_type; retraction_type = "expm"; %--> expm, taylor
 experiment = "RiemMix";  %%--> Karcher_mean, RiemMix
-number_of_runs = 1;
+number_of_runs = 10;
 if experiment == "Karcher_mean"
-    global retraction_type; retraction_type = "expm"; %--> expm , taylor
-    dimenion_of_matrix = 100;   %%--> for Karcher_mean: 100
-    solver_type = "RLBFGS_Wolfe_VTFree";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
-    start_with_given_initial_point = true;
-    %%%%%%% set the manifold based on the solver:
-    %%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree, SPD_VTFreeCholesky
-    if solver_type == "RLBFGS_cautious"
-        manifold_version = "SPD_manopt_original"; 
-    elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "taylor"
-        manifold_version = "SPD_mixest_original"; 
-    elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "expm"
-        manifold_version = "SPD_mixest_original_fast"; 
-    elseif solver_type == "RLBFGS_Wolfe_VTFree"
-        manifold_version = "SPD_VTFree"; 
-    elseif solver_type == "RLBFGS_Wolfe_VTFreeCholesky"
-        manifold_version = "SPD_VTFreeCholesky"; 
-    end
-    
+    dimenion_of_matrix = 100;   %%--> for RiemMix: 2 / for Karcher_mean: 100
 elseif experiment == "RiemMix"
-    dimenion_of_matrix = 2;   %%--> for RiemMix: 2 or 5 or ...
-    %%%%--> note: For the RiemMix experiment, code solves using all algorithms (solvers) (by for loops) and saves the results
-    DIMS = [dimenion_of_matrix]; % Dimension
-    SEPS = {'low','mid','high'}; % Separation
-    KS = [2]; % Number of Components
-    NDIM = [100]; % Number of Data = NDIM*(DIM^2)  ---> example: [10 100]
-    ES = [10]; % Eccentricity
-    INITS = {'kmeanspp'}; % Initialization --> 'default', 'kmeans', 'kmeanspp'
-    SELECT = 'PLL'; % 'SIGMA', 'PLL', 'MU'
-    
+    dimenion_of_matrix = 2;   %%--> for RiemMix: 2 / for Karcher_mean: 100
+end
+
+%% settings for Karcher mean:
+solver_type = "RLBFGS_Wolfe_VTFree";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
+start_with_given_initial_point = true;
+
+%% settings for RiemMix: 
+%%%%--> note: For the RiemMix experiment, code solves using all algorithms (solvers) (by for loops) and saves the results
+DIMS = [dimenion_of_matrix]; % Dimension
+SEPS = {'low','mid','high'}; % Separation
+KS = [2]; % Number of Components
+NDIM = [100]; % Number of Data = NDIM*(DIM^2)  ---> example: [10 100]
+ES = [10]; % Eccentricity
+INITS = {'kmeanspp'}; % Initialization --> 'default', 'kmeans', 'kmeanspp'
+SELECT = 'PLL'; % 'SIGMA', 'PLL', 'MU'
+
+%% set the manifold based on the solver:
+%%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree, SPD_VTFreeCholesky
+if solver_type == "RLBFGS_cautious"
+    manifold_version = "SPD_manopt_original"; 
+elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "taylor"
+    manifold_version = "SPD_mixest_original"; 
+elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "expm"
+    manifold_version = "SPD_mixest_original_fast"; 
+elseif solver_type == "RLBFGS_Wolfe_VTFree"
+    manifold_version = "SPD_VTFree"; 
+elseif solver_type == "RLBFGS_Wolfe_VTFreeCholesky"
+    manifold_version = "SPD_VTFreeCholesky"; 
 end
 
 %% optimization runs:

@@ -55,9 +55,11 @@ for imethod = 1:numel(methods)
     
     if PLOT_BY_TIME
         % interpolate results on equally-spaced time divisions
-        max_time = max(time_run(run,d2));
+        %max_time = max(time_run(run,d2));
+        max_time = max(time_run(run,:));
         plot_x = linspace(0, max_time, PLOT_TIME_DIVISIONS);
-        plot_y = nan(d1, PLOT_TIME_DIVISIONS);
+        %plot_y = nan(d1, PLOT_TIME_DIVISIONS);
+        plot_y = nan(1, PLOT_TIME_DIVISIONS);
         idx_inside = (plot_x <= time_run(end));
         plot_x_run = plot_x(idx_inside);
         plot_y(run,1:numel(plot_x_run)) = interp1(time_run, ...

@@ -43,8 +43,10 @@ function [x cost info] = sgd(problem, x, options)
     end
 
     % Set local defaults here
+    %localdefaults.sgd.stepsize = 0.001;
+    %localdefaults.sgd.epoch = 10;
     localdefaults.sgd.stepsize = 0.001;
-    localdefaults.sgd.epoch = 10;
+    localdefaults.sgd.epoch = 100;
 
     % Merge global and local defaults, then merge w/ user options, if any.
     localdefaults = mergeOptions(getGlobalDefaults(), localdefaults);
