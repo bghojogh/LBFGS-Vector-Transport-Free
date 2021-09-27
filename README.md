@@ -4,8 +4,8 @@ The code for vector transport free LBFGS quasi-Newton's optimization on the Symm
 This project reduces vector transport and Riemannian metric to identity and Euclidean inner product, respectively. 
 
 This is the code for the following paper:
-- Reza Godaz, Benyamin Ghojogh, Reshad Hosseini, Reza Monsefi, Fakhri Karray, Mark Crowley, "Vector Transport Free Riemannian LBFGS for Optimization on Symmetric Positive Definite Matrix Manifolds", arXiv preprint arXiv:2108.11019, 2021. 
-- Link of paper: https://arxiv.org/abs/2108.11019
+- Reza Godaz, Benyamin Ghojogh, Reshad Hosseini, Reza Monsefi, Fakhri Karray, Mark Crowley, "Vector Transport Free Riemannian LBFGS for Optimization on Symmetric Positive Definite Matrix Manifolds", Asian Conference on Machine Learning (ACML), 2021. 
+- Link to paper at arXiv: https://arxiv.org/abs/2108.11019
 
 ## Additional notes (related codes)
 
