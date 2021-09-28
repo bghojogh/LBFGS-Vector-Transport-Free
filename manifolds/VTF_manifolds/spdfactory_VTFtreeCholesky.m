@@ -92,7 +92,12 @@ M.tangent = M.proj;
 M.egrad2rgrad = @egrad2regrad;
     function Up = egrad2regrad(X, U)
         if VTFreeCholesky_flag
-            L = chol(X,'lower');
+            try
+                L = chol(X,'lower');
+            catch
+                epsilon_ = 1e-2;
+                L = chol(X + epsilon_ * eye(length(X)),'lower');
+            end
             Up = L' * sym(U) * L;
             
         else

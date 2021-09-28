@@ -9,40 +9,49 @@ install;
 
 %% general settings:
 global retraction_type; retraction_type = "expm"; %--> expm, taylor
-experiment = "RiemMix";  %%--> Karcher_mean, RiemMix
+experiment = "MetricLearning";  %%--> Karcher_mean, RiemMix , MetricLearning
 number_of_runs = 10;
-if experiment == "Karcher_mean"
-    dimenion_of_matrix = 100;   %%--> for RiemMix: 2 / for Karcher_mean: 100
-elseif experiment == "RiemMix"
-    dimenion_of_matrix = 2;   %%--> for RiemMix: 2 / for Karcher_mean: 100
-end
 
 %% settings for Karcher mean:
-solver_type = "RLBFGS_Wolfe_VTFree";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
-start_with_given_initial_point = true;
+if experiment == "Karcher_mean"
+    dimenion_of_matrix = 100;
+    solver_type = "RLBFGS_Wolfe_VTFree";  %%--> RLBFGS_cautious, RLBFGS_Wolfe, RLBFGS_Wolfe_VTFree, RLBFGS_Wolfe_VTFreeCholesky
+    start_with_given_initial_point = true;
+    %%%%% set the manifold based on the solver: ---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree, SPD_VTFreeCholesky
+    if solver_type == "RLBFGS_cautious"
+        manifold_version = "SPD_manopt_original"; 
+    elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "taylor"
+        manifold_version = "SPD_mixest_original"; 
+    elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "expm"
+        manifold_version = "SPD_mixest_original_fast"; 
+    elseif solver_type == "RLBFGS_Wolfe_VTFree"
+        manifold_version = "SPD_VTFree"; 
+    elseif solver_type == "RLBFGS_Wolfe_VTFreeCholesky"
+        manifold_version = "SPD_VTFreeCholesky"; 
+    end
+end
 
 %% settings for RiemMix: 
 %%%%--> note: For the RiemMix experiment, code solves using all algorithms (solvers) (by for loops) and saves the results
-DIMS = [dimenion_of_matrix]; % Dimension
-SEPS = {'low','mid','high'}; % Separation
-KS = [2]; % Number of Components
-NDIM = [100]; % Number of Data = NDIM*(DIM^2)  ---> example: [10 100]
-ES = [10]; % Eccentricity
-INITS = {'kmeanspp'}; % Initialization --> 'default', 'kmeans', 'kmeanspp'
-SELECT = 'PLL'; % 'SIGMA', 'PLL', 'MU'
+if experiment == "RiemMix"
+    dimenion_of_matrix = 2;   %%--> for RiemMix: 2 / for Karcher_mean: 100
+    DIMS = [dimenion_of_matrix]; % Dimension
+    SEPS = {'low','mid','high'}; % Separation
+    KS = [2]; % Number of Components
+    NDIM = [100]; % Number of Data = NDIM*(DIM^2)  ---> example: [10 100]
+    ES = [10]; % Eccentricity
+    INITS = {'kmeanspp'}; % Initialization --> 'default', 'kmeans', 'kmeanspp'
+    SELECT = 'PLL'; % 'SIGMA', 'PLL', 'MU'
+end
 
-%% set the manifold based on the solver:
-%%---> SPD_manopt_original, SPD_mixest_original, SPD_mixest_original_fast, SPD_VTFree, SPD_VTFreeCholesky
-if solver_type == "RLBFGS_cautious"
-    manifold_version = "SPD_manopt_original"; 
-elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "taylor"
-    manifold_version = "SPD_mixest_original"; 
-elseif solver_type == "RLBFGS_Wolfe" && retraction_type == "expm"
-    manifold_version = "SPD_mixest_original_fast"; 
-elseif solver_type == "RLBFGS_Wolfe_VTFree"
-    manifold_version = "SPD_VTFree"; 
-elseif solver_type == "RLBFGS_Wolfe_VTFreeCholesky"
-    manifold_version = "SPD_VTFreeCholesky"; 
+%% settings for MetricLearning: 
+if experiment == "MetricLearning"
+    dataset_name = 'iris';  %--> usps, vehicle, mnist, iris
+    tripletsize_per_class = 20;
+    solver_type = "VTF_RLBFGS_ISR";  % VTF_RLBFGS_ISR , VTF_RLBFGS_Cholesky , RLBFGS
+    triplet_type = true;
+    regularization_parameter = 1;
+    pca_n_components = 10; 
 end
 
 %% optimization runs:
@@ -122,6 +131,33 @@ for run_index = 1:number_of_runs
             end
         end
         info_ind = info_ind + size(info_list,2);
+        record_command_window(path_save+"plots2/", "off");
+
+    elseif experiment == "MetricLearning"
+        path_save = sprintf("%sdim=%d/run%d/", base_dir, dataset_name);
+        if ~exist(path_save, 'dir')
+            mkdir(path_save);
+        end
+        record_command_window(path_save+"plots2/", "on");
+        [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(dataset_name, tripletsize_per_class, solver_type, triplet_type, regularization_parameter, pca_n_components);
+        %%%% KNN before metric learning:
+        Mdl = fitcknn(ds.xTr, ds.yTr, 'NumNeighbors',10);
+        [label_pred_tr1,score,cost] = predict(Mdl, ds.xTr);
+        accuracy_train1 = sum(label_pred_tr1 == ds.yTr) / length(ds.yTr);
+        [label_pred_te1,score,cost] = predict(Mdl, ds.xTe);
+        accuracy_test1 = sum(label_pred_te1 == ds.yTe) / length(ds.yTe);
+        disp("Train accuracy (before metric learning): " + accuracy_train1);
+        disp("Test accuracy (before metric learning): " + accuracy_test1);
+        %%%% KNN after metric learning:
+        X_train_projected_rowWise = (W' * (ds.xTr)')';
+        X_test_projected_rowWise = (W' * (ds.xTe)')';
+        Mdl = fitcknn(X_train_projected_rowWise, ds.yTr, 'NumNeighbors',10);
+        [label_pred_tr2,score,cost] = predict(Mdl, X_train_projected_rowWise);
+        accuracy_train2 = sum(label_pred_tr2 == ds.yTr) / length(ds.yTr);
+        [label_pred_te2,score,cost] = predict(Mdl, X_test_projected_rowWise);
+        accuracy_test2 = sum(label_pred_te2 == ds.yTe) / length(ds.yTe);
+        disp("Train accuracy (after metric learning): " + accuracy_train2);
+        disp("Test accuracy (after metric learning): " + accuracy_test2);
         record_command_window(path_save+"plots2/", "off");
     end
     %%%%%%%% saving the workspace:

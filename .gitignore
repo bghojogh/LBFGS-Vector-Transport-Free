@@ -29,3 +29,5 @@ saved_files/
 examples/Karcher_mean/*.mat
 
 # lightspeed-master/
+
+examples/MetricLearning/Datasets/

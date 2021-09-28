@@ -42,10 +42,14 @@ function [x cost info costevals] = lbfgs_TransportFree(problem, x, options)
 % else
 %     VTFree_flag = false;
 % end
-if ~isfield(problem, 'costgrad')
+if ~isfield(problem, 'costgrad') && ~isfield(problem, 'egrad')
+    %---> Example: "Karcher mean" code 
     VTFree_flag = true;  %--> it means Riemannian gradient is given directly by the user (problem) and not computed from Euclidean gradient. So, we do not implicitly map the Riemannian gradient in egrad2rgrad operator of manifold_VTF and should map it explicitly in the algorithm.
 else
-    VTFree_flag = false;  %--> it means Riemannian gradient is not given directly by the user (problem) and is computed from Euclidean gradient. So, we do implicitly map the Riemannian gradient in egrad2rgrad operator of manifold_VTF and should not map it explicitly in the algorithm.
+    %---> Example: "RiemMix" (Gaussian mixture model) code, "MetricLearning" code
+    VTFree_flag = false;  %--> it means Riemannian gradient is not given directly by the user (problem) and is computed from Euclidean gradient. So, we do implicitly map the Riemannian gradient in egrad2rgrad operator of manifold_VTF (in the world of mapping) and should not map it explicitly in the algorithm again.
+    %--> [Note that the Euclidean gradient may have been given by user, but
+    %not the Riemannian gradient. In that case, Riemannian gradient is still calculated implicitely by the manifold operators so it is in the world of mapping. Hence, in that case, there is no need to map the gradient explicitely, too]
 end
 
 % Verify that the problem description is sufficient for the solver.
