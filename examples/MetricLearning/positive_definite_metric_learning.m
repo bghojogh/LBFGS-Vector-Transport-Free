@@ -1,4 +1,4 @@
-function [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(dataset_name, tripletsize_per_class, solver_type, triplet_type, regularization_parameter, pca_n_components)
+function [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(dataset_name, tripletsize_per_class, solver_type, triplet_type, regularization_parameter, pca_n_components, manual_initial_point, save_initial_path)
     %% loaqd dataset: 
     [ds]=load_data(dataset_name);
 
@@ -11,7 +11,7 @@ function [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(da
     %normalize(ds.xTe,'norm',2);
     
     %% apply PCA:
-    coeff = pca((ds.xTr)');
+    coeff = pca((ds.xTr));
     ds.xTr = ds.xTr * coeff(:, 1:pca_n_components);
     ds.xTe = ds.xTe * coeff(:, 1:pca_n_components);
   
@@ -76,12 +76,25 @@ function [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(da
     end
 
     %% optimization:
-    if solver_type == "VTF_RLBFGS_ISR"
-        [W, cost_, info_, costevals] = lbfgs_TransportFree(problem);
-    elseif solver_type == "VTF_RLBFGS_Cholesky"
-        [W, cost_, info_, costevals] = lbfgs_TransportFreeCholesky(problem);
-    elseif solver_type == "RLBFGS"
-        [W, cost_, info_, costevals] = lbfgs_MIXEST(problem);
+    if manual_initial_point
+        initial_point = problem.M.rand();
+        save(save_initial_path+"initial_point.mat", "initial_point");
+    else
+        load(save_initial_path+"initial_point.mat", "initial_point");
     end
     
+    if solver_type == "VTF_RLBFGS_ISR"
+        [W, cost_, info_, costevals] = lbfgs_TransportFree(problem, initial_point);
+    elseif solver_type == "VTF_RLBFGS_Cholesky"
+        [W, cost_, info_, costevals] = lbfgs_TransportFreeCholesky(problem, initial_point);
+    elseif solver_type == "RLBFGS"
+        [W, cost_, info_, costevals] = lbfgs_MIXEST(problem, initial_point);
+    end
+%     if solver_type == "VTF_RLBFGS_ISR"
+%         [W, cost_, info_, costevals] = lbfgs_TransportFree(problem);
+%     elseif solver_type == "VTF_RLBFGS_Cholesky"
+%         [W, cost_, info_, costevals] = lbfgs_TransportFreeCholesky(problem);
+%     elseif solver_type == "RLBFGS"
+%         [W, cost_, info_, costevals] = lbfgs_MIXEST(problem);
+%     end        
 end

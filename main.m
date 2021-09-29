@@ -1,5 +1,6 @@
 %% MATLAB initials:
 clc
+clear
 clear all
 close all
 
@@ -46,12 +47,13 @@ end
 
 %% settings for MetricLearning: 
 if experiment == "MetricLearning"
-    dataset_name = 'iris';  %--> usps, vehicle, mnist, iris
-    tripletsize_per_class = 20;
-    solver_type = "VTF_RLBFGS_ISR";  % VTF_RLBFGS_ISR , VTF_RLBFGS_Cholesky , RLBFGS
+    dataset_name = 'fisheriris';  %--> usps, vehicle, mnist, fisheriris
+    tripletsize_per_class = 30;
+    %solver_type = "RLBFGS";  % VTF_RLBFGS_ISR , VTF_RLBFGS_Cholesky , RLBFGS
+    solver_type_list = ["VTF_RLBFGS_ISR" , "VTF_RLBFGS_Cholesky" , "RLBFGS"];
     triplet_type = true;
     regularization_parameter = 1;
-    pca_n_components = 10; 
+    pca_n_components = 3; 
 end
 
 %% optimization runs:
@@ -134,31 +136,60 @@ for run_index = 1:number_of_runs
         record_command_window(path_save+"plots2/", "off");
 
     elseif experiment == "MetricLearning"
-        path_save = sprintf("%sdim=%d/run%d/", base_dir, dataset_name);
-        if ~exist(path_save, 'dir')
-            mkdir(path_save);
+        solver_index = 0;
+        for solver_type = solver_type_list
+            solver_index = solver_index + 1;
+            if solver_index == 1
+                manual_initial_point = true;
+            else
+                manual_initial_point = false;
+            end
+            path_save = sprintf("%sdataset=%s/run%d/solver=%s/", base_dir, dataset_name, run_index, solver_type);
+            if ~exist(path_save, 'dir')
+                mkdir(path_save);
+            end
+            save_initial_path = sprintf("%sdataset=%s/run%d/", base_dir, dataset_name, run_index);         
+            record_command_window(path_save, "on");
+            [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(dataset_name, tripletsize_per_class, solver_type, triplet_type, regularization_parameter, pca_n_components, manual_initial_point, save_initial_path);
+            %%%% KNN before metric learning:
+            Mdl = fitcknn(ds.xTr, ds.yTr, 'NumNeighbors',10);
+            [KNN_label_pred_tr_beforeML, KNN_score_tr_beforeML, KNN_cost_tr_beforeML] = predict(Mdl, ds.xTr);
+            accuracy_train_beforeML = sum(KNN_label_pred_tr_beforeML == ds.yTr) / length(ds.yTr);
+            [KNN_label_pred_te_beforeML, KNN_score_te_beforeML, KNN_cost_te_beforeML] = predict(Mdl, ds.xTe);
+            accuracy_test_beforeML = sum(KNN_label_pred_te_beforeML == ds.yTe) / length(ds.yTe);
+            disp("Train accuracy (before metric learning): " + accuracy_train_beforeML);
+            disp("Test accuracy (before metric learning): " + accuracy_test_beforeML);
+            %%%% KNN after metric learning:
+            X_train_projected_rowWise = (W' * (ds.xTr)')';
+            X_test_projected_rowWise = (W' * (ds.xTe)')';
+            Mdl = fitcknn(X_train_projected_rowWise, ds.yTr, 'NumNeighbors',10);
+            [KNN_label_pred_tr_afterML, KNN_score_tr_afterML, KNN_cost_tr_afterML] = predict(Mdl, X_train_projected_rowWise);
+            accuracy_train_afterML = sum(KNN_label_pred_tr_afterML == ds.yTr) / length(ds.yTr);
+            [KNN_label_pred_te_afterML, KNN_score_te_afterML, KNN_cost_te_afterML] = predict(Mdl, X_test_projected_rowWise);
+            accuracy_test_afterML = sum(KNN_label_pred_te_afterML == ds.yTe) / length(ds.yTe);
+            disp("Train accuracy (after metric learning): " + accuracy_train_afterML);
+            disp("Test accuracy (after metric learning): " + accuracy_test_afterML);
+            record_command_window(path_save, "off");
+            %%% save results:
+            %---- important information:
+            info_experiment = struct;
+            info_experiment.solver_type = solver_type;
+            info_experiment.dataset_name = dataset_name; 
+            [cost_list, grad_norm_list, stepsize_list, time_list, time_iterations] = get_optimization_history(info_);
+            info_experiment.iter_last = length(cost_list); info_experiment.cost_last = cost_list(end); info_experiment.time_last = time_list(end); 
+            info_experiment.accuracy_train_beforeML = accuracy_train_beforeML; info_experiment.accuracy_test_beforeML = accuracy_test_beforeML;
+            info_experiment.accuracy_train_afterML = accuracy_train_afterML; info_experiment.accuracy_test_afterML = accuracy_test_afterML; 
+            info_experiment.W = W; info_experiment.cost_ = cost_; info_experiment.info_ = info_; info_experiment.costevals = costevals; 
+            %---- less important information:
+            info_experiment.tripletsize_per_class = tripletsize_per_class; 
+            info_experiment.triplet_type = triplet_type; info_experiment.regularization_parameter = regularization_parameter; info_experiment.pca_n_components = pca_n_components; 
+            info_experiment.KNN_label_pred_tr_beforeML = KNN_label_pred_tr_beforeML; info_experiment.KNN_score_tr_beforeML = KNN_score_tr_beforeML; info_experiment.KNN_cost_tr_beforeML = KNN_cost_tr_beforeML; info_experiment.KNN_label_pred_te_beforeML = KNN_label_pred_te_beforeML; info_experiment.KNN_score_te_beforeML = KNN_score_te_beforeML; info_experiment.KNN_cost_te_beforeML = KNN_cost_te_beforeML;  
+            info_experiment.KNN_label_pred_tr_afterML = KNN_label_pred_tr_afterML; info_experiment.KNN_score_tr_afterML = KNN_score_tr_afterML; info_experiment.KNN_cost_tr_afterML = KNN_cost_tr_afterML; info_experiment.KNN_label_pred_te_afterML = KNN_label_pred_te_afterML; info_experiment.KNN_score_te_afterML = KNN_score_te_afterML; info_experiment.KNN_cost_te_afterML = KNN_cost_te_afterML; 
+            all_info(run_index, solver_index) = info_experiment; 
+            %%%%%%%% saving the workspace:
+            save(sprintf("%sdataset=%s/", base_dir, dataset_name)+"/all_info.mat", "all_info");
+            %save(path_save+"workspace.mat");
         end
-        record_command_window(path_save+"plots2/", "on");
-        [W, cost_, info_, costevals, ds] = positive_definite_metric_learning(dataset_name, tripletsize_per_class, solver_type, triplet_type, regularization_parameter, pca_n_components);
-        %%%% KNN before metric learning:
-        Mdl = fitcknn(ds.xTr, ds.yTr, 'NumNeighbors',10);
-        [label_pred_tr1,score,cost] = predict(Mdl, ds.xTr);
-        accuracy_train1 = sum(label_pred_tr1 == ds.yTr) / length(ds.yTr);
-        [label_pred_te1,score,cost] = predict(Mdl, ds.xTe);
-        accuracy_test1 = sum(label_pred_te1 == ds.yTe) / length(ds.yTe);
-        disp("Train accuracy (before metric learning): " + accuracy_train1);
-        disp("Test accuracy (before metric learning): " + accuracy_test1);
-        %%%% KNN after metric learning:
-        X_train_projected_rowWise = (W' * (ds.xTr)')';
-        X_test_projected_rowWise = (W' * (ds.xTe)')';
-        Mdl = fitcknn(X_train_projected_rowWise, ds.yTr, 'NumNeighbors',10);
-        [label_pred_tr2,score,cost] = predict(Mdl, X_train_projected_rowWise);
-        accuracy_train2 = sum(label_pred_tr2 == ds.yTr) / length(ds.yTr);
-        [label_pred_te2,score,cost] = predict(Mdl, X_test_projected_rowWise);
-        accuracy_test2 = sum(label_pred_te2 == ds.yTe) / length(ds.yTe);
-        disp("Train accuracy (after metric learning): " + accuracy_train2);
-        disp("Test accuracy (after metric learning): " + accuracy_test2);
-        record_command_window(path_save+"plots2/", "off");
     end
     %%%%%%%% saving the workspace:
     save(path_save+"workspace.mat");
