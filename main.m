@@ -10,7 +10,7 @@ install;
 
 %% general settings:
 global retraction_type; retraction_type = "expm"; %--> expm, taylor
-experiment = "MetricLearning";  %%--> Karcher_mean, RiemMix , MetricLearning
+experiment = "RiemMix";  %%--> Karcher_mean, RiemMix, MetricLearning
 number_of_runs = 10;
 
 %% settings for Karcher mean:
@@ -134,7 +134,6 @@ for run_index = 1:number_of_runs
         end
         info_ind = info_ind + size(info_list,2);
         record_command_window(path_save+"plots2/", "off");
-
     elseif experiment == "MetricLearning"
         solver_index = 0;
         for solver_type = solver_type_list

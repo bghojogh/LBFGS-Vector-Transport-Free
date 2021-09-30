@@ -47,7 +47,7 @@ if average_results_again
         end
     end
     
-    %--> take mean and std:
+    %%%%%%%%%%%%%%%%%%%%% take mean and std:
     if print_table_again
         path_ = sprintf("%sdataset=%s/", base_dir, dataset_name);
         fid = fopen(path_+'/results.txt', 'wt');
@@ -97,6 +97,18 @@ if average_results_again
     fclose(fid);
 end
 
-
+%% report KNN accuracy:
+for j = 1:size(all_info, 2)
+    accuracy_test_beforeML_list = 0;
+    accuracy_test_afterML_list = 0;
+    for i = 1:size(all_info, 1)
+        info_ = all_info(i,j);
+        accuracy_test_beforeML_list(i) = info_.accuracy_test_beforeML;
+        accuracy_test_afterML_list(i) = info_.accuracy_test_afterML;
+    end
+    disp(info_.solver_type)
+    fprintf("Average accuracy before ML = %f +- %f\n", mean(accuracy_test_beforeML_list), std(accuracy_test_beforeML_list))
+    fprintf("Average accuracy after ML = %f +- %f\n", mean(accuracy_test_afterML_list), std(accuracy_test_afterML_list))
+end
 
 
